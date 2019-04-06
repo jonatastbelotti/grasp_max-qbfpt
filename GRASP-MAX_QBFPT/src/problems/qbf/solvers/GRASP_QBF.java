@@ -2,12 +2,16 @@ package problems.qbf.solvers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
 import metaheuristics.grasp.AbstractGRASP;
 import metaheuristics.grasp.OperacaoBuscaLocal;
 import problems.qbf.QBF;
 import problems.qbf.QBF_Inverse;
+import problems.qbf.Triple;
+import problems.qbf.TripleElement;
 import solutions.Solution;
 
 /**
@@ -186,6 +190,105 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 
         return null;
     }
+    
+    /**
+     * That method generates a list of objects that represents each binary variable
+     * called Triple Element that could be inserted into a prohibited triple
+     * @return A list of Triple Elements
+     */
+    public ArrayList<TripleElement> generateTripleElements(){
+    	ArrayList<TripleElement> tripleElements = new ArrayList<TripleElement>();
+    	int n = ObjFunction.getDomainSize();
+    	for(int i = 0; i < n; i++)
+    	{
+    		tripleElements.add(new TripleElement(i));
+    	}
+		return tripleElements;
+    }
+    
+    /**
+     * Linear function congruent used to generate pseudo-random numbers
+     * 
+     * @param pi1
+     * @param pi2
+     * @param u
+     * @param n number of variables
+     * @return a pseudo-random variable index
+     */
+    public int l(int pi1, int pi2, int u, int n)
+    {
+    	return 1 + ((pi1 * u + pi2) % n);
+    }
+    
+    /**
+     * Method that generate the index of a element to be inserted
+     * on a prohibited triple
+     * 
+     * @param u
+     * @param n number of variables
+     * @return a pseudo-random variable index
+     */
+    public int g(int u, int n) {
+    	int pi1 = 131;
+    	int pi2 = 1031;
+    	int lU = l(pi1, pi2, u, n);
+    	
+    	if(lU != u)
+    		return lU;
+    	else
+    		return 1 + (lU % n);
+    }
+    
+    /**
+     * Method that generate the index of a element to be inserted
+     * on a prohibited triple
+     * 
+     * @param u
+     * @param n number of variables
+     * @return a pseudo-random variable index
+     */
+    public int h(int u, int n) {
+    	int pi1 = 193;
+    	int pi2 = 1093;
+    	int lU = l(pi1, pi2, u, n);
+    	int gU = g(u, n);
+    	if(lU != u && lU != gU)
+    		return lU;
+    	else if( (1 + (lU % n)) != u && (1 + (lU % n)) != gU)
+    		return 1 + (lU % n);
+    	else
+    		return 1 + ((lU + 1) % n);
+    }
+    
+    /**
+     * Method that generates a list of n prohibited triples using l g and h functions
+     * 
+     * @param tripleElements triple elements objects
+     * @return a list of n prohibited triples
+     */
+    public ArrayList<Triple> generateTriples(ArrayList<TripleElement> tripleElements)
+    {
+    	ArrayList<Triple> triples = new ArrayList<Triple>();
+    	int n = ObjFunction.getDomainSize() - 1;
+    	
+    	for(int u = 0; u < n; u++)
+    	{
+    		TripleElement te1, te2, te3;
+    		te1 = tripleElements.get(u);
+    		te2 = tripleElements.get(g(u, n));
+    		te3 = tripleElements.get(h(u, n));
+    		Triple novaTripla = new Triple(te1, te2, te3);
+    		
+    		Collections.sort(novaTripla.getElements(), new Comparator<TripleElement>(){
+                public int compare(TripleElement te1, TripleElement te2) {
+                  return te1.getIndex().compareTo(te2.getIndex());
+               }
+    		});
+    		
+    		triples.add(novaTripla);
+    	}
+		return triples;	
+    }
 
     /**
      * A main method used for testing the GRASP metaheuristic.
@@ -195,6 +298,13 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 
         long startTime = System.currentTimeMillis();
         GRASP_QBF grasp = new GRASP_QBF(0.05, 1000, "instances/qbf020");
+        
+        ArrayList<TripleElement> tripleElements = grasp.generateTripleElements();
+        ArrayList<Triple> triples = grasp.generateTriples(tripleElements);
+
+        //Print Triples
+        //for(int i = 0; i < triples.size(); i++) triples.get(i).printTriple();
+        
         Solution<Integer> bestSol = grasp.solve(30, 100);
         System.out.println("maxVal = " + bestSol);
         long endTime = System.currentTimeMillis();
