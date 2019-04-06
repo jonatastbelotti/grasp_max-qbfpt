@@ -60,9 +60,14 @@ public abstract class AbstractGRASP<E> {
     protected Solution<E> incumbentSol;
 
     /**
-     * the number of iterations the GRASP main loop executes.
+     * tempo para execução do GRASP.
      */
-    protected Integer iterations;
+    protected Integer tempoExecucao;
+    
+    /**
+     * Quantidade de iterações sem melhora para considerar a convergễncia do GRASP.
+     */
+    protected Integer iteraConvengencia;
 
     /**
      * the Candidate List of elements to enter the solution.
@@ -125,11 +130,13 @@ public abstract class AbstractGRASP<E> {
      * @param iterations The number of iterations which the GRASP will be
      * executed.
      */
-    public AbstractGRASP(Evaluator<E> objFunction, Double alpha, Integer iterations) {
+    public AbstractGRASP(Evaluator<E> objFunction, Double alpha, Integer tempoExecucao, Integer iteraConvengencia) {
         this.ObjFunction = objFunction;
         this.alpha = alpha;
-        this.iterations = iterations;
+        this.tempoExecucao = tempoExecucao;
+        this.iteraConvengencia = iteraConvengencia;
     }
+    
 
     /**
      * The GRASP constructive heuristic, which is responsible for building a
@@ -199,14 +206,14 @@ public abstract class AbstractGRASP<E> {
      *
      * @return The best feasible solution obtained throughout all iterations.
      */
-    public Solution<E> solve(long minutosExecucao, int iteraConvengencia) {
+    public Solution<E> solve() {
         long tempoInicial, iteracao;
         bestSol = createEmptySol();
         int iteracoesSemMelhora = 0;
         
         tempoInicial = System.currentTimeMillis();
         iteracao = 1;
-        while ((((System.currentTimeMillis() - tempoInicial) / 1000) / 60) <= minutosExecucao) {
+        while ((((System.currentTimeMillis() - tempoInicial) / 1000) / 60) <= this.tempoExecucao) {
             iteracao++;
             iteracoesSemMelhora++;
             
@@ -222,7 +229,7 @@ public abstract class AbstractGRASP<E> {
                 }
             }
             
-            if (iteracoesSemMelhora > iteraConvengencia) {
+            if (iteracoesSemMelhora > this.iteraConvengencia) {
                 break;
             }
         }

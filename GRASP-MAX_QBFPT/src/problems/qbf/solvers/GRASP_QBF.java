@@ -19,6 +19,8 @@ import solutions.Solution;
  * @author ccavellucci, fusberti
  */
 public class GRASP_QBF extends AbstractGRASP<Integer> {
+    
+    protected boolean firstImproving = false;
 
     /**
      * Constructor for the GRASP_QBF class. An inverse QBF objective function is
@@ -32,8 +34,10 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
      * parameters should be read.
      * @throws IOException necessary for I/O operations.
      */
-    public GRASP_QBF(Double alpha, Integer iterations, String filename) throws IOException {
-        super(new QBF_Inverse(filename), alpha, iterations);
+    public GRASP_QBF(Double alpha, Boolean firstImproving, Integer tempoExecucao, Integer iteraConvengencia, String filename) throws IOException {
+        super(new QBF_Inverse(filename), alpha, tempoExecucao, iteraConvengencia);
+        
+        this.firstImproving = firstImproving;
     }
 
     /*
@@ -155,7 +159,9 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
                     melhorVizinho = vizinho;
                     
                     // Se for fist improving basta dar um break aqui
-                    // break;
+                    if (this.firstImproving) {
+                        break;
+                    }
                 }
             }
             
@@ -194,8 +200,8 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
     public static void main(String[] args) throws IOException {
 
         long startTime = System.currentTimeMillis();
-        GRASP_QBF grasp = new GRASP_QBF(0.05, 1000, "instances/qbf020");
-        Solution<Integer> bestSol = grasp.solve(30, 100);
+        GRASP_QBF grasp = new GRASP_QBF(0.05, false, 30, 100, "instances/qbf020");
+        Solution<Integer> bestSol = grasp.solve();
         System.out.println("maxVal = " + bestSol);
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
