@@ -303,20 +303,16 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
     public static void main(String[] args) throws IOException {
 
         long startTime = System.currentTimeMillis();
-<<<<<<< HEAD
-        GRASP_QBF grasp = new GRASP_QBF(0.05, 1000, "instances/qbf020");
+        GRASP_QBF grasp = new GRASP_QBF(0.05, false, 30, 100, "instances/qbf020");
         
         ArrayList<TripleElement> tripleElements = grasp.generateTripleElements();
         ArrayList<Triple> triples = grasp.generateTriples(tripleElements);
 
         //Print Triples
         //for(int i = 0; i < triples.size(); i++) triples.get(i).printTriple();
-        
-        Solution<Integer> bestSol = grasp.solve(30, 100);
-=======
-        GRASP_QBF grasp = new GRASP_QBF(0.05, false, 30, 100, "instances/qbf020");
+
         Solution<Integer> bestSol = grasp.solve();
->>>>>>> 3fb6f3ebf8bfd1d65594d274925d7715762cdf9e
+        
         System.out.println("maxVal = " + bestSol);
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
