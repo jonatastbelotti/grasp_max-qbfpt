@@ -194,20 +194,36 @@ public abstract class AbstractGRASP<E> {
      * The GRASP mainframe. It consists of a loop, in which each iteration goes
      * through the constructive heuristic and local search. The best solution is
      * returned as result.
+     * @param minutosExecucao Define por quantos minitos o GRASP será executado
+     * @param iteraConvengencia Define quantas iterações sem alteração do best até parar a execução
      *
      * @return The best feasible solution obtained throughout all iterations.
      */
-    public Solution<E> solve() {
-
+    public Solution<E> solve(long minutosExecucao, int iteraConvengencia) {
+        long tempoInicial, iteracao;
         bestSol = createEmptySol();
-        for (int i = 0; i < iterations; i++) {
+        int iteracoesSemMelhora = 0;
+        
+        tempoInicial = System.currentTimeMillis();
+        iteracao = 1;
+        while ((((System.currentTimeMillis() - tempoInicial) / 1000) / 60) <= minutosExecucao) {
+            iteracao++;
+            iteracoesSemMelhora++;
+            
             constructiveHeuristic();
             localSearch();
+            
             if (bestSol.cost > incumbentSol.cost) {
                 bestSol = new Solution<E>(incumbentSol);
+                iteracoesSemMelhora = 0;
+                
                 if (verbose) {
-                    System.out.println("(Iter. " + i + ") BestSol = " + bestSol);
+                    System.out.println("(Iter. " + iteracao + ") BestSol = " + bestSol);
                 }
+            }
+            
+            if (iteracoesSemMelhora > iteraConvengencia) {
+                break;
             }
         }
 

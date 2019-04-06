@@ -154,7 +154,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
                     minDeltaCost = deltaCost;
                     melhorVizinho = vizinho;
                     
-                    // Se for fist best basta dar um break aqui
+                    // Se for fist improving basta dar um break aqui
                     // break;
                 }
             }
@@ -195,7 +195,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 
         long startTime = System.currentTimeMillis();
         GRASP_QBF grasp = new GRASP_QBF(0.05, 1000, "instances/qbf020");
-        Solution<Integer> bestSol = grasp.solve();
+        Solution<Integer> bestSol = grasp.solve(30, 100);
         System.out.println("maxVal = " + bestSol);
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
