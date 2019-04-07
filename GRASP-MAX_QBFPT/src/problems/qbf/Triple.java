@@ -19,7 +19,7 @@ public class Triple {
         int resp = 0;
 
         for (TripleElement e : elements) {
-            if (e.isSelected()) {
+            if (e.getSelected()) {
                 resp++;
             }
         }

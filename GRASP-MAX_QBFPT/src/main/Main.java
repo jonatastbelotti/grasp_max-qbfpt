@@ -10,7 +10,8 @@ import solutions.Solution;
  */
 public class Main {
 
-    public static final double ALPHA = 0.2;
+    public static final double ALPHA = 0.05;
+    public static final int TIPO_CONSTRUCAO = GRASP_MAXQBFPT.CONSTRUCAO_PADRAO;
     public static final boolean FIRST_IMPROVING = false;
     public static final int TEMPO_EXEC = 30; // Em minutos
     public static final int ITERACOES_CONVERGENCIA = 1000; // Iterações sem melhora para encerrar execução, números negativos para considerar apenas o tempo
@@ -33,15 +34,17 @@ public class Main {
             // Imprimindo as configurações do GRASP para cada arquivo
             System.out.println("Executando GRASP para o arquivo: " + arquivo);
             System.out.println("Configuração:");
-            System.out.printf(" ALPHA = %.2f\n", ALPHA);
-            System.out.println(" FIRST_IMPROVING = " + FIRST_IMPROVING);
+            imprimirTipoConstrucao();
+            imprimirAlpha();
+            imprimirEstrategiaBusca();
+            imprimirCriterioParada();
 
             // Executando GRASP
             System.out.println("Execução:");
 
             long tempoInicial = System.currentTimeMillis();
 
-            GRASP_MAXQBFPT grasp = new GRASP_MAXQBFPT(ALPHA, FIRST_IMPROVING, TEMPO_EXEC, ITERACOES_CONVERGENCIA, arquivo);
+            GRASP_MAXQBFPT grasp = new GRASP_MAXQBFPT(ALPHA, TIPO_CONSTRUCAO, FIRST_IMPROVING, TEMPO_EXEC, ITERACOES_CONVERGENCIA, arquivo);
             Solution<Integer> melhorSolucao = grasp.solve();
             System.out.println(" maxVal = " + melhorSolucao);
 
@@ -58,6 +61,50 @@ public class Main {
 
         System.out.println("\nTempo execução todos arquivos: " + (tempTotalFinal / 1000D) + "seg");
 
+    }
+
+    private static void imprimirTipoConstrucao() {
+        String resp = " Tipo construção = ";
+        
+        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.CONSTRUCAO_PADRAO) {
+            resp += "Construção padrão";
+        }
+        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.CONSTRUCAO_REATIVA) {
+            resp += "Construção reativa";
+        }
+        
+        
+        System.out.println(resp);
+    }
+
+    private static void imprimirAlpha() {
+        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.CONSTRUCAO_PADRAO) {
+            System.out.println(" Alpha = " + ALPHA);
+        }
+    }
+
+    private static void imprimirEstrategiaBusca() {
+        String resp = " Busca local = ";
+        
+        if (FIRST_IMPROVING) {
+            resp += "First Improving";
+        } else {
+            resp += "Best Improving";
+        }
+        
+        System.out.println(resp);
+    }
+
+    private static void imprimirCriterioParada() {
+        String resp = " Critério de parada = ";
+        
+        resp += TEMPO_EXEC + " minutos";
+        
+        if (ITERACOES_CONVERGENCIA > 0) {
+            resp += " ou " + ITERACOES_CONVERGENCIA + " iterações sem melhoria";
+        }
+        
+        System.out.println(resp);
     }
 
 }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Random;
+import metaheuristics.grasp.AlphaReativo;
 import problems.qbf.Triple;
 import problems.qbf.TripleElement;
 import solutions.Solution;
@@ -16,6 +18,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     
     public static final int CONSTRUCAO_PADRAO = 1;
     public static final int CONSTRUCAO_REATIVA = 2;
+    private ArrayList<AlphaReativo> listaAlphas;
     
     private final int tipoConstrucao;
     private TripleElement[] tripleElements;
@@ -26,6 +29,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         super(alpha, firstImproving, tempoExecucao, iteraConvengencia, filename);
         
         this.tipoConstrucao = tipoConstrucao;
+        gerarListaAlphas();
 
         generateTripleElements();
         generateTriples();
@@ -43,7 +47,11 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         limparTriplasEmUso();
         
         if (this.tipoConstrucao == CONSTRUCAO_REATIVA) {
-            return construcaoReativa();
+            Solution<Integer> solucao;
+            
+            escolherAlpha();
+            solucao = super.constructiveHeuristic();
+            atualizarProbAlphas();
         }
 
         return super.constructiveHeuristic();
@@ -63,7 +71,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         // Passando por todos os elementos e verificando se eles podem ser usados ainda
         for (TripleElement tripElem : this.tripleElements) {
             // Se o elemento já foi usado
-            if (tripElem.isSelected()) {
+            if (tripElem.getSelected()) {
                 continue;
             }
 
@@ -217,6 +225,28 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         }
         
         return incumbentSol;
+    }
+
+    private void gerarListaAlphas() {
+        this.listaAlphas = new ArrayList<>();
+        
+        for (double val = 0.05; val <= 0.2; val += 0.05) {
+            AlphaReativo alphaReativo = new AlphaReativo(val, 1D / (0.2 / 0.05));
+            this.listaAlphas.add(alphaReativo);
+        }
+    }
+
+    private void escolherAlpha() {
+        Random rand = new Random();
+        double probTotal = 0D;
+        
+        for (AlphaReativo alpha : this.listaAlphas) {
+            probTotal += alpha.getProb();
+        }
+    }
+
+    private void atualizarProbAlphas() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

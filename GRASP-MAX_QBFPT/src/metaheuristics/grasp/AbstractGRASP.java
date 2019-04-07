@@ -144,10 +144,12 @@ public abstract class AbstractGRASP<E> {
      */
     public Solution<E> constructiveHeuristic() {
 
-        CL = makeCL();
-        RCL = makeRCL();
         incumbentSol = createEmptySol();
         incumbentCost = Double.POSITIVE_INFINITY;
+
+        CL = makeCL();
+        RCL = makeRCL();
+
 
         /* Main loop, which repeats until the stopping criteria is reached. */
         while (!constructiveStopCriteria()) {
@@ -155,31 +157,34 @@ public abstract class AbstractGRASP<E> {
             double maxCost = Double.NEGATIVE_INFINITY, minCost = Double.POSITIVE_INFINITY;
             incumbentCost = ObjFunction.evaluate(incumbentSol);
             updateCL();
-            
+
             if (CL.isEmpty()) {
                 break;
             }
 
             /*
-			 * Explore all candidate elements to enter the solution, saving the
-			 * highest and lowest cost variation achieved by the candidates.
+            * Explore all candidate elements to enter the solution, saving the
+            * highest and lowest cost variation achieved by the candidates.
              */
             for (E c : CL) {
                 Double deltaCost = ObjFunction.evaluateInsertionCost(c, incumbentSol);
+
                 if (deltaCost < minCost) {
                     minCost = deltaCost;
                 }
+
                 if (deltaCost > maxCost) {
                     maxCost = deltaCost;
                 }
             }
 
             /*
-			 * Among all candidates, insert into the RCL those with the highest
-			 * performance using parameter alpha as threshold.
+            * Among all candidates, insert into the RCL those with the highest
+            * performance using parameter alpha as threshold.
              */
             for (E c : CL) {
                 Double deltaCost = ObjFunction.evaluateInsertionCost(c, incumbentSol);
+
                 if (deltaCost <= minCost + alpha * (maxCost - minCost)) {
                     RCL.add(c);
                 }
