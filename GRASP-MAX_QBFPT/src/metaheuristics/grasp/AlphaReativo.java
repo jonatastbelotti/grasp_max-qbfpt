@@ -8,10 +8,14 @@ public class AlphaReativo {
 
     private final double valor;
     private double prob;
+    private int quantUsos;
+    private double totalCustos;
 
     public AlphaReativo(double valor, double prob) {
         this.valor = valor;
         this.prob = prob;
+        this.quantUsos = 0;
+        this.totalCustos = 0D;
     }
 
     public double getValor() {
@@ -20,6 +24,21 @@ public class AlphaReativo {
 
     public double getProb() {
         return prob;
+    }
+    
+    public void addUso(double custo) {
+        this.quantUsos++;
+        this.totalCustos += custo;
+    }
+    
+    public double calcQi(double bestCost) {
+        double mediaSolucoes = Double.MAX_VALUE;
+        
+        if (this.quantUsos > 0) {
+            mediaSolucoes = this.totalCustos / this.quantUsos;
+        }
+        
+        return bestCost / mediaSolucoes;
     }
 
 }

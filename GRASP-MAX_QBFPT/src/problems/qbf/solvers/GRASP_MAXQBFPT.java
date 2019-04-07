@@ -47,11 +47,11 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         limparTriplasEmUso();
         
         if (this.tipoConstrucao == CONSTRUCAO_REATIVA) {
-            Solution<Integer> solucao;
+            Solution<Integer> solucaoParcial;
             
             escolherAlpha();
-            solucao = super.constructiveHeuristic();
-            atualizarProbAlphas();
+            solucaoParcial = super.constructiveHeuristic();
+            atualizarProbAlphas(solucaoParcial);
         }
 
         return super.constructiveHeuristic();
@@ -239,14 +239,33 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     private void escolherAlpha() {
         Random rand = new Random();
         double probTotal = 0D;
+        double sorteio, soma;
         
-        for (AlphaReativo alpha : this.listaAlphas) {
-            probTotal += alpha.getProb();
+        for (AlphaReativo alp : this.listaAlphas) {
+            probTotal += alp.getProb();
+        }
+        
+        sorteio = rand.nextDouble() * probTotal;
+        
+        soma = 0D;        
+        for (AlphaReativo alp : this.listaAlphas) {
+            soma += alp.getProb();
+            
+            if (soma >= sorteio) {
+                this.alpha = alp.getValor();
+            }
         }
     }
 
-    private void atualizarProbAlphas() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void atualizarProbAlphas(Solution<Integer> solucaoParcia) {
+        // Atualizando alpha usado agora
+        for (AlphaReativo alp : this.listaAlphas) {
+            if (alp.getValor() == this.alpha) {
+                alp.addUso(solucaoParcia.cost);
+                break;
+            }
+        }
+        
     }
 
 }
