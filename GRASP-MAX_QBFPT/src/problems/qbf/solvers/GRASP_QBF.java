@@ -2,15 +2,11 @@ package problems.qbf.solvers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Random;
 
 import metaheuristics.grasp.AbstractGRASP;
 import metaheuristics.grasp.OperacaoBuscaLocal;
 import problems.qbf.QBF_Inverse;
-import problems.qbf.Triple;
-import problems.qbf.TripleElement;
 import solutions.Solution;
 
 /**

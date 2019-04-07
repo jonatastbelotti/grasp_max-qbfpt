@@ -13,7 +13,7 @@ public class Main {
     public static final double ALPHA = 0.2;
     public static final boolean FIRST_IMPROVING = false;
     public static final int TEMPO_EXEC = 30; // Em minutos
-    public static final int ITERACOES_CONVERGENCIA = -1; // Iterações sem melhora para encerrar execução, números negativos para considerar apenas o tempo
+    public static final int ITERACOES_CONVERGENCIA = 1000; // Iterações sem melhora para encerrar execução, números negativos para considerar apenas o tempo
 
     public static final String[] listaArquivos = new String[]{
         "instances/qbf020",

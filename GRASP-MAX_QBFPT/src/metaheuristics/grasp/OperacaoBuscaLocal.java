@@ -6,9 +6,9 @@ package metaheuristics.grasp;
  */
 public class OperacaoBuscaLocal {
 
-    public static int INSERCAO = 1;
-    public static int REMOCAO = 2;
-    public static int TROCA = 3;
+    public static final int INSERCAO = 1;
+    public static final int REMOCAO = 2;
+    public static final int TROCA = 3;
 
     private int tipoOperacao;
     private Integer elemento;
