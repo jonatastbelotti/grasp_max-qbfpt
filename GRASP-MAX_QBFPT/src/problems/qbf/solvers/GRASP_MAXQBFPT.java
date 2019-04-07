@@ -53,7 +53,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         // Passando por todos os elementos e verificando se eles podem ser usados ainda
         for (TripleElement tripElem : this.tripleElements) {
             // Se o elemento já foi usado
-            if (tripElem.isSelected()) {
+            if (tripElem.getSelected()) {
                 continue;
             }
 
