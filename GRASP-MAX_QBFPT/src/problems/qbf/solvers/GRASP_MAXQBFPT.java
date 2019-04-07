@@ -22,8 +22,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     
     private final int tipoConstrucao;
     private TripleElement[] tripleElements;
-    private ArrayList<Triple> triples;
-    private ArrayList<Triple>[] prohibitedTriples; // vetor em que cada posição contém um ArrayList
+    private Triple[] triples;
 
     public GRASP_MAXQBFPT(Double alpha, int tipoConstrucao, Boolean firstImproving, Integer tempoExecucao, Integer iteraConvengencia, String filename) throws IOException {
         super(alpha, firstImproving, tempoExecucao, iteraConvengencia, filename);
@@ -44,7 +43,6 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      */
     @Override
     public Solution<Integer> constructiveHeuristic() {
-        limparTriplasEmUso();
         
         if (this.tipoConstrucao == CONSTRUCAO_REATIVA) {
             Solution<Integer> solucao;
@@ -59,33 +57,13 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
     @Override
     public ArrayList<Integer> makeCL() {
-        ArrayList<Integer> _CL = new ArrayList<Integer>();
-
-        // Marcando todos os elementos da solução atual como já usados nas triplas
-        if (this.incumbentSol != null) {
-            for (Integer e : this.incumbentSol) {
-                this.tripleElements[e].setSelected(true);
-            }
-        }
-
-        // Passando por todos os elementos e verificando se eles podem ser usados ainda
+    	int n = ObjFunction.getDomainSize();
+    	ArrayList<Integer> _CL = new ArrayList<Integer>(n);
+    	
         for (TripleElement tripElem : this.tripleElements) {
-            // Se o elemento já foi usado
-            if (tripElem.getSelected()) {
-                continue;
-            }
-
-            // Se adicionar esse elemento significa quebrar uma tripla
-            boolean podeAdicionar = true;
-            for (Triple triple : this.prohibitedTriples[tripElem.index]) {
-                if (triple.elementosEmUso() >= 2) {
-                    podeAdicionar = false;
-                }
-            }
-            
-            if (podeAdicionar) {
-                _CL.add(tripElem.index);
-            }
+            tripElem.setAvailable(true);
+            tripElem.setSelected(false);
+            _CL.add(tripElem.getIndex());
         }
 
         return _CL;
@@ -93,7 +71,39 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
     @Override
     public void updateCL() {
-        this.CL = makeCL();
+        ArrayList<Integer> _CL = new ArrayList<Integer>();
+        
+    	if (this.incumbentSol != null) {
+            for (Integer e : this.incumbentSol) {
+                this.tripleElements[e].setSelected(true);
+                this.tripleElements[e].setAvailable(false);
+            }
+    	}
+    	   	
+    	for(Triple trip : this.triples)
+    	{
+    		TripleElement te0, te1, te2;
+    		te0 = trip.getElements().get(0);
+    		te1 = trip.getElements().get(1);
+    		te2 = trip.getElements().get(2);
+    		
+    		if(te0.getSelected() && te1.getSelected())
+    			te2.setAvailable(false);
+    		else if(te0.getSelected() && te2.getSelected())
+    			te1.setAvailable(false);
+    		else if(te1.getSelected() && te2.getSelected())
+    			te0.setAvailable(false);
+    	}
+    	
+    	for(TripleElement tripElem : this.tripleElements)
+    	{
+    		if(!tripElem.getSelected() && tripElem.getAvailable())
+    		{
+    			_CL.add(tripElem.getIndex());
+    		}
+    	}
+    	
+        this.CL = _CL;
     }
 
     /**
@@ -117,15 +127,10 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      * functions
      */
     private void generateTriples() {
-        int n = ObjFunction.getDomainSize() - 1;
-        this.triples = new ArrayList();
-        this.prohibitedTriples = new ArrayList[ObjFunction.getDomainSize()];
+    	int n = ObjFunction.getDomainSize() - 1;
+        this.triples = new Triple[ObjFunction.getDomainSize()];
 
-        for (int i = 0; i < this.prohibitedTriples.length; i++) {
-            this.prohibitedTriples[i] = new ArrayList<>();
-        }
-
-        for (int u = 0; u < n; u++) {
+        for (int u = 0; u <= n; u++) {
             TripleElement te1, te2, te3;
             Triple novaTripla;
 
@@ -140,10 +145,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
                 }
             });
 
-            this.triples.add(novaTripla);
-            this.prohibitedTriples[te1.index].add(novaTripla);
-            this.prohibitedTriples[te2.index].add(novaTripla);
-            this.prohibitedTriples[te3.index].add(novaTripla);
+            this.triples[u] = novaTripla;
         }
     }
 
@@ -200,15 +202,6 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
             return 1 + (lU % n);
         } else {
             return 1 + ((lU + 1) % n);
-        }
-    }
-
-    /*
-    * Método que marca todos os elementos como não usados ainda
-     */
-    private void limparTriplasEmUso() {
-        for (TripleElement ele : this.tripleElements) {
-            ele.setSelected(false);
         }
     }
 
