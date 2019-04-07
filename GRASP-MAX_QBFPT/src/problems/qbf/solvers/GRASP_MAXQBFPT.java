@@ -13,13 +13,19 @@ import solutions.Solution;
  * @author Jônatas Trabuco Belotti [jonatas.t.belotti@hotmail.com]
  */
 public class GRASP_MAXQBFPT extends GRASP_QBF {
-
+    
+    public static final int CONSTRUCAO_PADRAO = 1;
+    public static final int CONSTRUCAO_REATIVA = 2;
+    
+    private final int tipoConstrucao;
     private TripleElement[] tripleElements;
     private ArrayList<Triple> triples;
     private ArrayList<Triple>[] prohibitedTriples; // vetor em que cada posição contém um ArrayList
 
-    public GRASP_MAXQBFPT(Double alpha, Boolean firstImproving, Integer tempoExecucao, Integer iteraConvengencia, String filename) throws IOException {
+    public GRASP_MAXQBFPT(Double alpha, int tipoConstrucao, Boolean firstImproving, Integer tempoExecucao, Integer iteraConvengencia, String filename) throws IOException {
         super(alpha, firstImproving, tempoExecucao, iteraConvengencia, filename);
+        
+        this.tipoConstrucao = tipoConstrucao;
 
         generateTripleElements();
         generateTriples();
@@ -35,6 +41,10 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     @Override
     public Solution<Integer> constructiveHeuristic() {
         limparTriplasEmUso();
+        
+        if (this.tipoConstrucao == CONSTRUCAO_REATIVA) {
+            return construcaoReativa();
+        }
 
         return super.constructiveHeuristic();
     }
@@ -192,6 +202,21 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         for (TripleElement ele : this.tripleElements) {
             ele.setSelected(false);
         }
+    }
+
+    /*
+    * Método que implementa a construção reativa
+    */
+    private Solution<Integer> construcaoReativa() {
+        CL = makeCL();
+        RCL = makeRCL();
+        incumbentSol = createEmptySol();
+        incumbentCost = Double.POSITIVE_INFINITY;
+        
+        while (!CL.isEmpty()) {
+        }
+        
+        return incumbentSol;
     }
 
 }
