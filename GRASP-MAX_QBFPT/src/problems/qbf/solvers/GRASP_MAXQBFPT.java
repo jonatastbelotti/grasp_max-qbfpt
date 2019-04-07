@@ -99,17 +99,15 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      * functions
      */
     private void generateTriples() {
-        int n = ObjFunction.getDomainSize();
+        int n = ObjFunction.getDomainSize() - 1;
         this.triples = new ArrayList();
-        this.prohibitedTriples = new ArrayList[n];
+        this.prohibitedTriples = new ArrayList[ObjFunction.getDomainSize()];
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < this.prohibitedTriples.length; i++) {
             this.prohibitedTriples[i] = new ArrayList<>();
         }
 
-        n = n - 1;
-
-        for (int u = 0; u <= n; u++) {
+        for (int u = 0; u < n; u++) {
             TripleElement te1, te2, te3;
             Triple novaTripla;
 

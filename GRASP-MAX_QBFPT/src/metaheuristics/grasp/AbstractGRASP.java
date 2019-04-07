@@ -228,7 +228,7 @@ public abstract class AbstractGRASP<E> {
                 }
             }
 
-            if (iteracoesSemMelhora > this.iteraConvengencia) {
+            if (this.iteraConvengencia > 0 && iteracoesSemMelhora > this.iteraConvengencia) {
                 break;
             }
         }
