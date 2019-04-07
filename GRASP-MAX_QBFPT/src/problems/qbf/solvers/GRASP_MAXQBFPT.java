@@ -205,26 +205,15 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         }
     }
 
-    /*
-    * Método que implementa a construção reativa
-    */
-    private Solution<Integer> construcaoReativa() {
-        CL = makeCL();
-        RCL = makeRCL();
-        incumbentSol = createEmptySol();
-        incumbentCost = Double.POSITIVE_INFINITY;
-        
-        while (!CL.isEmpty()) {
-        }
-        
-        return incumbentSol;
-    }
-
     private void gerarListaAlphas() {
+        double VAL_INICIAL = 0.1;
+        double VAL_INCREMENTO = 0.05;
+        double VAL_FINAL = 1;
+        
         this.listaAlphas = new ArrayList<>();
         
-        for (double val = 0.05; val <= 0.2; val += 0.05) {
-            AlphaReativo alphaReativo = new AlphaReativo(val, 1D / (0.2 / 0.05));
+        for (double val = VAL_INICIAL; val <= VAL_FINAL; val += VAL_INCREMENTO) {
+            AlphaReativo alphaReativo = new AlphaReativo(val, 1D / (VAL_FINAL / VAL_INCREMENTO));
             this.listaAlphas.add(alphaReativo);
         }
     }
@@ -241,13 +230,16 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         sorteio = rand.nextDouble() * probTotal;
         
         soma = 0D;        
-        for (AlphaReativo alp : this.listaAlphas) {
+        for (AlphaReativo alp : embarralharLista(this.listaAlphas)) {
             soma += alp.getProb();
             
             if (soma >= sorteio) {
                 this.alpha = alp.getValor();
+                break;
             }
         }
+        
+//        System.out.println("Alpha = " + this.alpha);
     }
 
     private void atualizarProbAlphas(Solution<Integer> solucaoParcia) {
@@ -259,6 +251,37 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
             }
         }
         
+        // Calculando novas probabilidades
+        double somaQi = 0D;
+        double melhorCusto = solucaoParcia.cost;
+        if (this.bestCost != null) {
+            melhorCusto = this.bestCost;
+        }
+        for (AlphaReativo alp : this.listaAlphas) {
+            somaQi += alp.calcQi(melhorCusto);
+        }
+        
+        for (AlphaReativo alp : this.listaAlphas) {
+            alp.setProb(alp.calcQi(melhorCusto) / somaQi);
+        }
+    }
+
+    private ArrayList<AlphaReativo> embarralharLista(ArrayList<AlphaReativo> listaAlphas) {
+        Random rand = new Random();
+        ArrayList<AlphaReativo> resp = new ArrayList<>();
+        ArrayList<Integer> listaIndices = new ArrayList<>();
+        
+        for (int i = 0; i < listaAlphas.size(); i++) {
+            listaIndices.add(i);
+        }
+        
+        while (!listaIndices.isEmpty()) {
+            int n = rand.nextInt(listaIndices.size());
+            resp.add(listaAlphas.get(listaIndices.get(n)));
+            listaIndices.remove(n);            
+        }
+        
+        return resp;
     }
 
 }
