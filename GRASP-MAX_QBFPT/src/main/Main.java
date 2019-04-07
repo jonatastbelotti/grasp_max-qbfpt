@@ -15,7 +15,7 @@ public class Main {
     public static final int TEMPO_EXEC = 30; // Em minutos
     public static final int ITERACOES_CONVERGENCIA = 1000; // Iterações sem melhora para encerrar execução, números negativos para considerar apenas o tempo
 
-    public static final String[] listaArquivos = new String[]{
+    public static final String[] LISTA_ARQUIVOS = new String[]{
         "instances/qbf020",
         "instances/qbf040",
         "instances/qbf060",
@@ -29,7 +29,7 @@ public class Main {
         long tempTotalInicial = System.currentTimeMillis();
 
         // Passando por todos os arquivos
-        for (String arquivo : listaArquivos) {
+        for (String arquivo : LISTA_ARQUIVOS) {
             // Imprimindo as configurações do GRASP para cada arquivo
             System.out.println("Executando GRASP para o arquivo: " + arquivo);
             System.out.println("Configuração:");
