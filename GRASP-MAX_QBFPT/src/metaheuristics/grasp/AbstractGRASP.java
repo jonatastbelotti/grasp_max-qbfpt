@@ -155,6 +155,10 @@ public abstract class AbstractGRASP<E> {
             double maxCost = Double.NEGATIVE_INFINITY, minCost = Double.POSITIVE_INFINITY;
             incumbentCost = ObjFunction.evaluate(incumbentSol);
             updateCL();
+            
+            if (CL.isEmpty()) {
+                break;
+            }
 
             /*
 			 * Explore all candidate elements to enter the solution, saving the
@@ -198,10 +202,6 @@ public abstract class AbstractGRASP<E> {
      * The GRASP mainframe. It consists of a loop, in which each iteration goes
      * through the constructive heuristic and local search. The best solution is
      * returned as result.
-     *
-     * @param minutosExecucao Define por quantos minitos o GRASP será executado
-     * @param iteraConvengencia Define quantas iterações sem alteração do best
-     * até parar a execução
      *
      * @return The best feasible solution obtained throughout all iterations.
      */

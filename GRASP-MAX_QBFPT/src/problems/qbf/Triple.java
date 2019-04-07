@@ -15,6 +15,18 @@ public class Triple {
         return elements;
     }
 
+    public int elementosEmUso() {
+        int resp = 0;
+
+        for (TripleElement e : elements) {
+            if (e.isSelected()) {
+                resp++;
+            }
+        }
+
+        return resp;
+    }
+
     public void printTriple() {
         System.out.print("[" + elements.get(0).getIndex() + ", ");
         System.out.print(elements.get(1).getIndex() + ", ");

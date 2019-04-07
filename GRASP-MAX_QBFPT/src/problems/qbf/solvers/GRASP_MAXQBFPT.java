@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import problems.qbf.Triple;
 import problems.qbf.TripleElement;
+import solutions.Solution;
 
 /**
  *
@@ -22,6 +23,59 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
         generateTripleElements();
         generateTriples();
+    }
+
+    /**
+     * The GRASP constructive heuristic, which is responsible for building a
+     * feasible solution by selecting in a greedy-random fashion, candidate
+     * elements to enter the solution.
+     *
+     * @return A feasible solution to the problem being minimized.
+     */
+    @Override
+    public Solution<Integer> constructiveHeuristic() {
+        limparTriplasEmUso();
+
+        return super.constructiveHeuristic();
+    }
+
+    @Override
+    public ArrayList<Integer> makeCL() {
+        ArrayList<Integer> _CL = new ArrayList<Integer>();
+
+        // Marcando todos os elementos da solução atual como já usados nas triplas
+        if (this.incumbentSol != null) {
+            for (Integer e : this.incumbentSol) {
+                this.tripleElements[e].setSelected(true);
+            }
+        }
+
+        // Passando por todos os elementos e verificando se eles podem ser usados ainda
+        for (TripleElement tripElem : this.tripleElements) {
+            // Se o elemento já foi usado
+            if (tripElem.isSelected()) {
+                continue;
+            }
+
+            // Se adicionar esse elemento significa quebrar uma tripla
+            boolean podeAdicionar = true;
+            for (Triple triple : this.prohibitedTriples[tripElem.index]) {
+                if (triple.elementosEmUso() >= 2) {
+                    podeAdicionar = false;
+                }
+            }
+            
+            if (podeAdicionar) {
+                _CL.add(tripElem.index);
+            }
+        }
+
+        return _CL;
+    }
+
+    @Override
+    public void updateCL() {
+        this.CL = makeCL();
     }
 
     /**
@@ -48,7 +102,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         int n = ObjFunction.getDomainSize();
         this.triples = new ArrayList();
         this.prohibitedTriples = new ArrayList[n];
-        
+
         for (int i = 0; i < n; i++) {
             this.prohibitedTriples[i] = new ArrayList<>();
         }
@@ -123,13 +177,22 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         int pi2 = 1093;
         int lU = l(pi1, pi2, u, n);
         int gU = g(u, n);
-        
+
         if (lU != u && lU != gU) {
             return lU;
         } else if ((1 + (lU % n)) != u && (1 + (lU % n)) != gU) {
             return 1 + (lU % n);
         } else {
             return 1 + ((lU + 1) % n);
+        }
+    }
+
+    /*
+    * Método que marca todos os elementos como não usados ainda
+     */
+    private void limparTriplasEmUso() {
+        for (TripleElement ele : this.tripleElements) {
+            ele.setSelected(false);
         }
     }
 
