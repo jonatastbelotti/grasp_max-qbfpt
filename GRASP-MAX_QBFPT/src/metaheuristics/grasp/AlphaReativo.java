@@ -31,15 +31,23 @@ public class AlphaReativo {
         this.totalCustos += custo;
     }
 
+    public int getQuantUsos() {
+        return quantUsos;
+    }
+
     public void setProb(double prob) {
-        this.prob = prob;
+        if (prob > 0) {
+            this.prob = prob;
+        }
     }
 
     public double calcQi(double bestCost) {
-        double mediaSolucoes = 10D;
+        double mediaSolucoes = bestCost;
 
         if (this.quantUsos > 0) {
             mediaSolucoes = this.totalCustos / this.quantUsos;
+        } else {
+            return 0D;
         }
 
         return bestCost / mediaSolucoes;

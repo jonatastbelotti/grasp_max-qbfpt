@@ -14,7 +14,7 @@ public class Main {
     public static final int TIPO_CONSTRUCAO = GRASP_MAXQBFPT.CONSTRUCAO_REATIVA;
     public static final boolean FIRST_IMPROVING = false;
     public static final int TEMPO_EXEC = 30; // Em minutos
-    public static final int ITERACOES_CONVERGENCIA = 100; // Iterações sem melhora para encerrar execução, números negativos para considerar apenas o tempo
+    public static final int ITERACOES_CONVERGENCIA = 1000; // Iterações sem melhora para encerrar execução, números negativos para considerar apenas o tempo
 
     public static final String[] LISTA_ARQUIVOS = new String[]{
         "instances/qbf020",

@@ -207,7 +207,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
     private void gerarListaAlphas() {
         double VAL_INICIAL = 0.1;
-        double VAL_INCREMENTO = 0.05;
+        double VAL_INCREMENTO = 0.01;
         double VAL_FINAL = 1;
         
         this.listaAlphas = new ArrayList<>();
@@ -224,6 +224,11 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         double sorteio, soma;
         
         for (AlphaReativo alp : this.listaAlphas) {
+            if (alp.getQuantUsos() < 1) {
+                this.alpha = alp.getValor();
+                return;
+            }
+            
             probTotal += alp.getProb();
         }
         
