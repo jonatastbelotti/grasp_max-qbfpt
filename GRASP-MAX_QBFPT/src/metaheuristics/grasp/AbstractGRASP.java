@@ -1,6 +1,3 @@
-/**
- *
- */
 package metaheuristics.grasp;
 
 import java.util.ArrayList;

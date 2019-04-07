@@ -31,8 +31,9 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
      *
      * @param alpha The GRASP greediness-randomness parameter (within the range
      * [0,1])
-     * @param iterations The number of iterations which the GRASP will be
-     * executed.
+     * @param firstImproving
+     * @param tempoExecucao
+     * @param iteraConvengencia
      * @param filename Name of the file for which the objective function
      * parameters should be read.
      * @throws IOException necessary for I/O operations.
@@ -82,7 +83,6 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
      */
     @Override
     public void updateCL() {
-
         // do nothing since all elements off the solution are viable candidates.
     }
 
@@ -205,9 +205,11 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
     public ArrayList<TripleElement> generateTripleElements() {
         ArrayList<TripleElement> tripleElements = new ArrayList<TripleElement>();
         int n = ObjFunction.getDomainSize();
+        
         for (int i = 0; i < n; i++) {
             tripleElements.add(new TripleElement(i));
         }
+        
         return tripleElements;
     }
 
@@ -292,6 +294,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 
             triples.add(novaTripla);
         }
+        
         return triples;
     }
 
