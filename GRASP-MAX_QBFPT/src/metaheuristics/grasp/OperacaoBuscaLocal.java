@@ -54,7 +54,5 @@ public class OperacaoBuscaLocal {
     public Integer getElementoEntra() {
         return elementoEntra;
     }
-    
-    
 
 }

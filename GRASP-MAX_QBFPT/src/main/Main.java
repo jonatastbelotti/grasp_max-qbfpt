@@ -7,7 +7,6 @@ package main;
 
 import java.io.IOException;
 import problems.qbf.solvers.GRASP_MAXQBFPT;
-import problems.qbf.solvers.GRASP_QBF;
 import solutions.Solution;
 
 /**
@@ -58,13 +57,11 @@ public class Main {
             // Ao final imprime duas linhas em branco
             System.out.println("\n");
         }
-        
-        
+
         // Calculando tempo total de todas as execuções
         long tempTotalFinal = System.currentTimeMillis() - tempTotalInicial;
-        
-        System.out.println("\nTempo execução todos arquivos: " + (tempTotalFinal/ 1000D) + "seg");
-        
+
+        System.out.println("\nTempo execução todos arquivos: " + (tempTotalFinal / 1000D) + "seg");
 
     }
 

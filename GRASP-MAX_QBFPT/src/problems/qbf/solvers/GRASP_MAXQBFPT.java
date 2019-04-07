@@ -6,7 +6,6 @@
 package problems.qbf.solvers;
 
 import java.io.IOException;
-import solutions.Solution;
 
 /**
  *
