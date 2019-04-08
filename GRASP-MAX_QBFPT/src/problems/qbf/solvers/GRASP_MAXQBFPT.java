@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
-import metaheuristics.grasp.AlphaReativo;
+
+import alternativeConstruction.AlphaReativo;
 import solutions.Solution;
 import triple.Triple;
 import triple.TripleElement;
