@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import localSearch.OperacaoBuscaLocal;
 import metaheuristics.grasp.AbstractGRASP;
-import metaheuristics.grasp.OperacaoBuscaLocal;
 import problems.qbf.QBF_Inverse;
 import solutions.Solution;
 
