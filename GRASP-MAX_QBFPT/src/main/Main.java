@@ -11,7 +11,7 @@ import solutions.Solution;
 public class Main {
 
     public static final double ALPHA = 0.05;
-    public static final int TIPO_CONSTRUCAO = GRASP_MAXQBFPT.CONSTRUCAO_REATIVA;
+    public static final int TIPO_CONSTRUCAO = GRASP_MAXQBFPT.SAMPLED_GREEDY;
     public static final boolean FIRST_IMPROVING = false;
     public static final int TEMPO_EXEC = 30; // Em minutos
     public static final int ITERACOES_CONVERGENCIA = 1000; // Iterações sem melhora para encerrar execução, números negativos para considerar apenas o tempo
@@ -71,6 +71,9 @@ public class Main {
         }
         if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.CONSTRUCAO_REATIVA) {
             resp += "Construção reativa";
+        }
+        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.SAMPLED_GREEDY) {
+            resp += "Sampled greedy";
         }
         
         

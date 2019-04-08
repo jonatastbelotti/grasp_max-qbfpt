@@ -18,11 +18,13 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     
     public static final int CONSTRUCAO_PADRAO = 1;
     public static final int CONSTRUCAO_REATIVA = 2;
+    public static final int SAMPLED_GREEDY = 3;
     private ArrayList<AlphaReativo> listaAlphas;
     
     private final int tipoConstrucao;
     private TripleElement[] tripleElements;
     private Triple[] triples;
+    private final int sampleGreedyP;
 
     public GRASP_MAXQBFPT(Double alpha, int tipoConstrucao, Boolean firstImproving, Integer tempoExecucao, Integer iteraConvengencia, String filename) throws IOException {
         super(alpha, firstImproving, tempoExecucao, iteraConvengencia, filename);
@@ -32,6 +34,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
         generateTripleElements();
         generateTriples();
+        sampleGreedyP = (int) (0.05 * ObjFunction.getDomainSize());
     }
 
     /**
@@ -51,7 +54,12 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
             solucaoParcial = super.constructiveHeuristic();
             atualizarProbAlphas(solucaoParcial);
         }
+        else if (this.tipoConstrucao == SAMPLED_GREEDY)
+        {
+        	sampleGreedyConstruction();
+        }
 
+        // Standard construction 
         return super.constructiveHeuristic();
     }
 
@@ -204,6 +212,58 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
             return 1 + ((lU + 1) % n);
         }
     }
+    
+    /*
+     * Method that implements SAMPLED GREEDY CONSTRUCTION
+     */
+     private Solution<Integer> sampleGreedyConstruction() {
+         
+         incumbentSol = createEmptySol();
+         incumbentCost = Double.POSITIVE_INFINITY;
+         CL = makeCL();
+         RCL = makeRCL();
+         
+         
+         /* Main loop, which repeats until the stopping criteria is reached. */
+         while (!constructiveStopCriteria()) {
+             double minCost = Double.POSITIVE_INFINITY;
+             Integer bestCandidate = -1;
+             
+             incumbentCost = ObjFunction.evaluate(incumbentSol);
+             updateCL();
+
+             if (CL.isEmpty()) {
+                 break;
+             }
+             
+             /* Chose randomly min{p,|CL|} candidates to constructi a new CL*/
+             ArrayList<Integer> sampledGreedyCL = (ArrayList<Integer>) CL.clone();            
+             Collections.shuffle(sampledGreedyCL);
+             int minimumP = Math.min(this.sampleGreedyP, CL.size());
+             for(int i = 0; i < minimumP; i++)
+             {
+                 RCL.add(sampledGreedyCL.get(i));
+             }
+             
+             /* Choose the best candidate from the RCL */
+             for (Integer c : sampledGreedyCL) {
+                 Double newCost = ObjFunction.evaluateInsertionCost(c, incumbentSol);
+                 if (newCost < minCost) {
+                     minCost = newCost;
+                     bestCandidate = c;
+                 }
+             }
+             
+             // Insert best candidate in partial solution
+             CL.remove(bestCandidate);
+             incumbentSol.add(bestCandidate);
+             ObjFunction.evaluate(incumbentSol);
+             RCL.clear();
+
+         }
+
+         return incumbentSol;
+     }
 
     private void gerarListaAlphas() {
         double VAL_INICIAL = 0.1;
