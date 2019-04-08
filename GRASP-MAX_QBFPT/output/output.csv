@@ -1,0 +1,11 @@
+fileName,alpha,construction,localSearch
+instances/qbf020,0.05,1,true
+instances/qbf040,0.05,1,true
+instances/qbf020,0.1,1,true
+instances/qbf040,0.1,1,true
+instances/qbf020,0.05,1,false
+instances/qbf040,0.05,1,false
+instances/qbf020,0.05,2,true
+instances/qbf040,0.05,2,true
+instances/qbf020,0.05,3,true
+instances/qbf040,0.05,3,true
