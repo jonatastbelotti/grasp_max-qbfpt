@@ -15,12 +15,12 @@ import solutions.Solution;
  * @author Jônatas Trabuco Belotti [jonatas.t.belotti@hotmail.com]
  */
 public class GRASP_MAXQBFPT extends GRASP_QBF {
-    
+
     public static final int CONSTRUCAO_PADRAO = 1;
     public static final int CONSTRUCAO_REATIVA = 2;
     public static final int SAMPLED_GREEDY = 3;
     private ArrayList<AlphaReativo> listaAlphas;
-    
+
     private final int tipoConstrucao;
     private TripleElement[] tripleElements;
     private Triple[] triples;
@@ -28,7 +28,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
     public GRASP_MAXQBFPT(Double alpha, int tipoConstrucao, Boolean firstImproving, Integer tempoExecucao, Integer iteraConvengencia, String filename) throws IOException {
         super(alpha, firstImproving, tempoExecucao, iteraConvengencia, filename);
-        
+
         this.tipoConstrucao = tipoConstrucao;
         gerarListaAlphas();
 
@@ -46,17 +46,15 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      */
     @Override
     public Solution<Integer> constructiveHeuristic() {
-        
+
         if (this.tipoConstrucao == CONSTRUCAO_REATIVA) {
             Solution<Integer> solucaoParcial;
-            
+
             escolherAlpha();
             solucaoParcial = super.constructiveHeuristic();
             atualizarProbAlphas(solucaoParcial);
-        }
-        else if (this.tipoConstrucao == SAMPLED_GREEDY)
-        {
-        	sampleGreedyConstruction();
+        } else if (this.tipoConstrucao == SAMPLED_GREEDY) {
+            return sampleGreedyConstruction();
         }
 
         // Standard construction 
@@ -65,9 +63,9 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
     @Override
     public ArrayList<Integer> makeCL() {
-    	int n = ObjFunction.getDomainSize();
-    	ArrayList<Integer> _CL = new ArrayList<Integer>(n);
-    	
+        int n = ObjFunction.getDomainSize();
+        ArrayList<Integer> _CL = new ArrayList<Integer>(n);
+
         for (TripleElement tripElem : this.tripleElements) {
             tripElem.setAvailable(true);
             tripElem.setSelected(false);
@@ -80,37 +78,35 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     @Override
     public void updateCL() {
         ArrayList<Integer> _CL = new ArrayList<Integer>();
-        
-    	if (this.incumbentSol != null) {
+
+        if (this.incumbentSol != null) {
             for (Integer e : this.incumbentSol) {
                 this.tripleElements[e].setSelected(true);
                 this.tripleElements[e].setAvailable(false);
             }
-    	}
-    	   	
-    	for(Triple trip : this.triples)
-    	{
-    		TripleElement te0, te1, te2;
-    		te0 = trip.getElements().get(0);
-    		te1 = trip.getElements().get(1);
-    		te2 = trip.getElements().get(2);
-    		
-    		if(te0.getSelected() && te1.getSelected())
-    			te2.setAvailable(false);
-    		else if(te0.getSelected() && te2.getSelected())
-    			te1.setAvailable(false);
-    		else if(te1.getSelected() && te2.getSelected())
-    			te0.setAvailable(false);
-    	}
-    	
-    	for(TripleElement tripElem : this.tripleElements)
-    	{
-    		if(!tripElem.getSelected() && tripElem.getAvailable())
-    		{
-    			_CL.add(tripElem.getIndex());
-    		}
-    	}
-    	
+        }
+
+        for (Triple trip : this.triples) {
+            TripleElement te0, te1, te2;
+            te0 = trip.getElements().get(0);
+            te1 = trip.getElements().get(1);
+            te2 = trip.getElements().get(2);
+
+            if (te0.getSelected() && te1.getSelected()) {
+                te2.setAvailable(false);
+            } else if (te0.getSelected() && te2.getSelected()) {
+                te1.setAvailable(false);
+            } else if (te1.getSelected() && te2.getSelected()) {
+                te0.setAvailable(false);
+            }
+        }
+
+        for (TripleElement tripElem : this.tripleElements) {
+            if (!tripElem.getSelected() && tripElem.getAvailable()) {
+                _CL.add(tripElem.getIndex());
+            }
+        }
+
         this.CL = _CL;
     }
 
@@ -135,7 +131,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      * functions
      */
     private void generateTriples() {
-    	int n = ObjFunction.getDomainSize() - 1;
+        int n = ObjFunction.getDomainSize() - 1;
         this.triples = new Triple[ObjFunction.getDomainSize()];
 
         for (int u = 0; u <= n; u++) {
@@ -212,66 +208,64 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
             return 1 + ((lU + 1) % n);
         }
     }
-    
+
     /*
      * Method that implements SAMPLED GREEDY CONSTRUCTION
      */
-     private Solution<Integer> sampleGreedyConstruction() {
-         
-         incumbentSol = createEmptySol();
-         incumbentCost = Double.POSITIVE_INFINITY;
-         CL = makeCL();
-         RCL = makeRCL();
-         
-         
-         /* Main loop, which repeats until the stopping criteria is reached. */
-         while (!constructiveStopCriteria()) {
-             double minCost = Double.POSITIVE_INFINITY;
-             Integer bestCandidate = -1;
-             
-             incumbentCost = ObjFunction.evaluate(incumbentSol);
-             updateCL();
+    private Solution<Integer> sampleGreedyConstruction() {
 
-             if (CL.isEmpty()) {
-                 break;
-             }
-             
-             /* Chose randomly min{p,|CL|} candidates to constructi a new CL*/
-             ArrayList<Integer> sampledGreedyCL = (ArrayList<Integer>) CL.clone();            
-             Collections.shuffle(sampledGreedyCL);
-             int minimumP = Math.min(this.sampleGreedyP, CL.size());
-             for(int i = 0; i < minimumP; i++)
-             {
-                 RCL.add(sampledGreedyCL.get(i));
-             }
-             
-             /* Choose the best candidate from the RCL */
-             for (Integer c : sampledGreedyCL) {
-                 Double newCost = ObjFunction.evaluateInsertionCost(c, incumbentSol);
-                 if (newCost < minCost) {
-                     minCost = newCost;
-                     bestCandidate = c;
-                 }
-             }
-             
-             // Insert best candidate in partial solution
-             CL.remove(bestCandidate);
-             incumbentSol.add(bestCandidate);
-             ObjFunction.evaluate(incumbentSol);
-             RCL.clear();
+        incumbentSol = createEmptySol();
+        incumbentCost = Double.POSITIVE_INFINITY;
+        CL = makeCL();
+        RCL = makeRCL();
 
-         }
+        /* Main loop, which repeats until the stopping criteria is reached. */
+        while (!constructiveStopCriteria()) {
+            double minCost = Double.POSITIVE_INFINITY;
+            Integer bestCandidate = -1;
 
-         return incumbentSol;
-     }
+            incumbentCost = ObjFunction.evaluate(incumbentSol);
+            updateCL();
+
+            if (CL.isEmpty()) {
+                break;
+            }
+
+            /* Chose randomly min{p,|CL|} candidates to constructi a new CL*/
+            ArrayList<Integer> sampledGreedyCL = (ArrayList<Integer>) CL.clone();
+            Collections.shuffle(sampledGreedyCL);
+            int minimumP = Math.min(this.sampleGreedyP, CL.size());
+            for (int i = 0; i < minimumP; i++) {
+                RCL.add(sampledGreedyCL.get(i));
+            }
+
+            /* Choose the best candidate from the RCL */
+            for (Integer c : sampledGreedyCL) {
+                Double newCost = ObjFunction.evaluateInsertionCost(c, incumbentSol);
+                if (newCost < minCost) {
+                    minCost = newCost;
+                    bestCandidate = c;
+                }
+            }
+
+            // Insert best candidate in partial solution
+            CL.remove(bestCandidate);
+            incumbentSol.add(bestCandidate);
+            ObjFunction.evaluate(incumbentSol);
+            RCL.clear();
+
+        }
+
+        return incumbentSol;
+    }
 
     private void gerarListaAlphas() {
         double VAL_INICIAL = 0.1;
         double VAL_INCREMENTO = 0.01;
         double VAL_FINAL = 1;
-        
+
         this.listaAlphas = new ArrayList<>();
-        
+
         for (double val = VAL_INICIAL; val <= VAL_FINAL; val += VAL_INCREMENTO) {
             AlphaReativo alphaReativo = new AlphaReativo(val, 1D / (VAL_FINAL / VAL_INCREMENTO));
             this.listaAlphas.add(alphaReativo);
@@ -282,28 +276,28 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         Random rand = new Random();
         double probTotal = 0D;
         double sorteio, soma;
-        
+
         for (AlphaReativo alp : this.listaAlphas) {
             if (alp.getQuantUsos() < 1) {
                 this.alpha = alp.getValor();
                 return;
             }
-            
+
             probTotal += alp.getProb();
         }
-        
+
         sorteio = rand.nextDouble() * probTotal;
-        
-        soma = 0D;        
-        for (AlphaReativo alp : embarralharLista(this.listaAlphas)) {
+
+        soma = 0D;
+        for (AlphaReativo alp : embaralharLista(this.listaAlphas)) {
             soma += alp.getProb();
-            
+
             if (soma >= sorteio) {
                 this.alpha = alp.getValor();
                 break;
             }
         }
-        
+
 //        System.out.println("Alpha = " + this.alpha);
     }
 
@@ -315,7 +309,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
                 break;
             }
         }
-        
+
         // Calculando novas probabilidades
         double somaQi = 0D;
         double melhorCusto = solucaoParcia.cost;
@@ -325,27 +319,27 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         for (AlphaReativo alp : this.listaAlphas) {
             somaQi += alp.calcQi(melhorCusto);
         }
-        
+
         for (AlphaReativo alp : this.listaAlphas) {
             alp.setProb(alp.calcQi(melhorCusto) / somaQi);
         }
     }
 
-    private ArrayList<AlphaReativo> embarralharLista(ArrayList<AlphaReativo> listaAlphas) {
+    private ArrayList<AlphaReativo> embaralharLista(ArrayList<AlphaReativo> listaAlphas) {
         Random rand = new Random();
         ArrayList<AlphaReativo> resp = new ArrayList<>();
         ArrayList<Integer> listaIndices = new ArrayList<>();
-        
+
         for (int i = 0; i < listaAlphas.size(); i++) {
             listaIndices.add(i);
         }
-        
+
         while (!listaIndices.isEmpty()) {
             int n = rand.nextInt(listaIndices.size());
             resp.add(listaAlphas.get(listaIndices.get(n)));
-            listaIndices.remove(n);            
+            listaIndices.remove(n);
         }
-        
+
         return resp;
     }
 
