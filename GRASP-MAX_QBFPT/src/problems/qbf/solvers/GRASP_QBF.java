@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import localSearch.OperacaoBuscaLocal;
+import localSearch.LocalSearchOperation;
 import metaheuristics.grasp.AbstractGRASP;
 import problems.qbf.QBF_Inverse;
 import solutions.Solution;
@@ -107,28 +107,28 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 
         Random rand = new Random();
         Double minDeltaCost;
-        OperacaoBuscaLocal melhorVizinho = null;
+        LocalSearchOperation melhorVizinho = null;
 
         do {
             minDeltaCost = Double.POSITIVE_INFINITY;
             updateCL();
 
-            ArrayList<OperacaoBuscaLocal> listaVizinhanca = new ArrayList<>();
+            ArrayList<LocalSearchOperation> listaVizinhanca = new ArrayList<>();
 
             // Adicionando toda vizinhança de inclusão de elementos
             for (Integer candIn : CL) {
-                listaVizinhanca.add(new OperacaoBuscaLocal(OperacaoBuscaLocal.INSERCAO, candIn));
+                listaVizinhanca.add(new LocalSearchOperation(LocalSearchOperation.INSERT, candIn));
             }
 
             // Adicionando toda vizinhança de remoção de elementos
             for (Integer candOut : incumbentSol) {
-                listaVizinhanca.add(new OperacaoBuscaLocal(OperacaoBuscaLocal.REMOCAO, candOut));
+                listaVizinhanca.add(new LocalSearchOperation(LocalSearchOperation.REMOVE, candOut));
             }
 
             // Adicionando toda vizinhança de troca de elementos
             for (Integer candIn : CL) {
                 for (Integer candOut : incumbentSol) {
-                    listaVizinhanca.add(new OperacaoBuscaLocal(candOut, candIn));
+                    listaVizinhanca.add(new LocalSearchOperation(candOut, candIn));
                 }
             }
 
@@ -138,15 +138,15 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
                 int ind = rand.nextInt(listaVizinhanca.size());
 
                 double deltaCost = Double.POSITIVE_INFINITY;
-                OperacaoBuscaLocal vizinho = listaVizinhanca.get(ind);
-                if (vizinho.isInsercao()) {
-                    deltaCost = ObjFunction.evaluateInsertionCost(vizinho.getElemento(), incumbentSol);
+                LocalSearchOperation vizinho = listaVizinhanca.get(ind);
+                if (vizinho.isInsertion()) {
+                    deltaCost = ObjFunction.evaluateInsertionCost(vizinho.getElement(), incumbentSol);
                 }
-                if (vizinho.isRemocao()) {
-                    deltaCost = ObjFunction.evaluateRemovalCost(vizinho.getElemento(), incumbentSol);
+                if (vizinho.isRemoval()) {
+                    deltaCost = ObjFunction.evaluateRemovalCost(vizinho.getElement(), incumbentSol);
                 }
-                if (vizinho.isTroca()) {
-                    deltaCost = ObjFunction.evaluateExchangeCost(vizinho.getElementoEntra(), vizinho.getElementoSai(), incumbentSol);
+                if (vizinho.isExchange()) {
+                    deltaCost = ObjFunction.evaluateExchangeCost(vizinho.getInElement(), vizinho.getOutElement(), incumbentSol);
                 }
 
                 // Removendo esse vizinho para não passar mais por ele
@@ -166,22 +166,22 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 
             // Implement the best move, if it reduces the solution cost.
             if (minDeltaCost < -Double.MIN_VALUE && melhorVizinho != null) {
-                if (melhorVizinho.isInsercao()) {
-                    incumbentSol.add(melhorVizinho.getElemento());
-                    CL.remove(melhorVizinho.getElemento());
+                if (melhorVizinho.isInsertion()) {
+                    incumbentSol.add(melhorVizinho.getElement());
+                    CL.remove(melhorVizinho.getElement());
                 }
 
-                if (melhorVizinho.isRemocao()) {
-                    incumbentSol.remove(melhorVizinho.getElemento());
-                    CL.add(melhorVizinho.getElemento());
+                if (melhorVizinho.isRemoval()) {
+                    incumbentSol.remove(melhorVizinho.getElement());
+                    CL.add(melhorVizinho.getElement());
                 }
 
-                if (melhorVizinho.isTroca()) {
-                    incumbentSol.add(melhorVizinho.getElementoEntra());
-                    CL.remove(melhorVizinho.getElementoEntra());
+                if (melhorVizinho.isExchange()) {
+                    incumbentSol.add(melhorVizinho.getInElement());
+                    CL.remove(melhorVizinho.getInElement());
 
-                    incumbentSol.remove(melhorVizinho.getElementoSai());
-                    CL.add(melhorVizinho.getElementoSai());
+                    incumbentSol.remove(melhorVizinho.getOutElement());
+                    CL.add(melhorVizinho.getOutElement());
                 }
 
                 ObjFunction.evaluate(incumbentSol);
