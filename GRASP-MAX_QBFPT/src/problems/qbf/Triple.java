@@ -3,6 +3,11 @@ package problems.qbf;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * 
+ * @author Jônatas Trabuco Belotti [jonatas.t.belotti@hotmail.com]
+ * @author Felipe de Carvalho Pereira [felipe.pereira@students.ic.unicamp.br]
+ */
 public class Triple {
 
     public final ArrayList<TripleElement> elements;

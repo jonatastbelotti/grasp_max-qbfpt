@@ -5,8 +5,9 @@ import problems.qbf.solvers.GRASP_MAXQBFPT;
 import solutions.Solution;
 
 /**
- *
+ * 
  * @author Jônatas Trabuco Belotti [jonatas.t.belotti@hotmail.com]
+ * @author Felipe de Carvalho Pereira [felipe.pereira@students.ic.unicamp.br]
  */
 public class Main {
 
