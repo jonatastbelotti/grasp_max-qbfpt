@@ -6,53 +6,87 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
-import alternativeConstruction.AlphaReativo;
+import alternativeConstruction.ReactiveAlpha;
 import solutions.Solution;
 import triple.Triple;
 import triple.TripleElement;
 
 /**
- * 
+ * Class that implements the GRASP specifications for solving the MAXQBFPT
+ * problem.
+ *
  * @author Jônatas Trabuco Belotti [jonatas.t.belotti@hotmail.com]
  * @author Felipe de Carvalho Pereira [felipe.pereira@students.ic.unicamp.br]
  */
 public class GRASP_MAXQBFPT extends GRASP_QBF {
 
-	// RLC construction mechanisms
+    // RLC construction mechanisms
     public static final int STANDARD = 1;
     public static final int REACTIVE = 2;
     public static final int SAMPLED_GREEDY = 3;
     private final int contructionMechanism;
-    
-    // List of alphas used in reactive construction
-    private ArrayList<AlphaReativo> reactiveAlphas;
-    
-    // Parameter p used in sampleGreedy construction
+
+    /**
+     * List of alphas used in reactive construction.
+     */
+    private ArrayList<ReactiveAlpha> reactiveAlphas;
+
+    /**
+     * Parameter p used in sampleGreedy construction.
+     */
     private int sampleGreedyP;
-    
-    // List of element objects used in prohibited triples
-    // These objects represents the variables of the model
+
+    /**
+     * List of element objects used in prohibited triples. These objects
+     * represents the variables of the model.
+     */
     private TripleElement[] tripleElements;
-    
-    // List of prohibited triples
+
+    /**
+     * List of prohibited triples.
+     */
     private Triple[] triples;
 
-    public GRASP_MAXQBFPT(Double alpha, int contructionMechanism, Boolean firstImproving, Integer executionTime, Integer iterationsLimit, String filename) throws IOException {
-        
-    	super(alpha, firstImproving, executionTime, iterationsLimit, filename);
+    /**
+     * Constructor of the class, responsible for defining the fixed Alpha value
+     * to be used, the type of construction that will be used, the local search
+     * strategy to be used, the time limit to find the solution, the number of
+     * iterations without improvement in the solution that defines the
+     * convergence and the file with the coefficients of that instance of the
+     * problem.
+     *
+     * @param alpha O valor de Alpha que deverá ser utilizado na construção.
+     * @param contructionMechanism The type of construction to be used
+     * (GRASP_MAXQBFPT.STANDARD, GRASP_MAXQBFPT.REACTIVE e
+     * GRASP_MAXQBFPT.SAMPLED_GREEDY).
+     * @param firstImproving If the local search strategy will be First
+     * Improving, otherwise it will be Best Improving.
+     * @param timeLimite Timeout in minutes for the execution of the algorithm.
+     * @param iterationsLimit Number of iterations without solution improvement
+     * until considering the convergence of the algorithm. If a negative value
+     * is used only the execution time will be considered as a stop criterion.
+     * @param filename Local or complete path of the file with the coefficients
+     * of that instance of the problem.
+     * @throws IOException Generates an exception if the file with the
+     * coefficients does not exist.
+     */
+    public GRASP_MAXQBFPT(Double alpha, int contructionMechanism, Boolean firstImproving, Integer timeLimite, Integer iterationsLimit, String filename) throws IOException {
+
+        super(alpha, firstImproving, timeLimite, iterationsLimit, filename);
         this.contructionMechanism = contructionMechanism;
-        
-        if(contructionMechanism == REACTIVE)
-        	gerarListaAlphas();
-        else if(contructionMechanism == SAMPLED_GREEDY)
-        	sampleGreedyP = (int) (0.05 * ObjFunction.getDomainSize());
-        
+
+        if (contructionMechanism == REACTIVE) {
+            generateAlphaList();
+        } else if (contructionMechanism == SAMPLED_GREEDY) {
+            sampleGreedyP = (int) (0.05 * ObjFunction.getDomainSize());
+        }
+
         generateTripleElements();
         generateTriples();
     }
-    
+
     /**
-     * Linear congruent function l used to generate pseudo-random numbers
+     * Linear congruent function l used to generate pseudo-random numbers.
      */
     public int l(int pi1, int pi2, int u, int n) {
         return 1 + ((pi1 * u + pi2) % n);
@@ -90,10 +124,10 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
             return 1 + ((lU + 1) % n);
         }
     }
-    
+
     /**
-     * That method generates a list of objects (Triple Elements) that represents each binary
-     * variable that could be inserted into a prohibited triple
+     * That method generates a list of objects (Triple Elements) that represents
+     * each binary variable that could be inserted into a prohibited triple
      */
     private void generateTripleElements() {
         int n = ObjFunction.getDomainSize();
@@ -105,7 +139,8 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     }
 
     /**
-     * Method that generates a list of n prohibited triples using l g and h functions
+     * Method that generates a list of n prohibited triples using l g and h
+     * functions
      */
     private void generateTriples() {
         int n = ObjFunction.getDomainSize() - 1;
@@ -130,8 +165,6 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         }
     }
 
-    
-
     /**
      * The GRASP constructive heuristic, which is responsible for building a
      * feasible solution by selecting in a greedy-random fashion, candidate
@@ -143,11 +176,11 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     public Solution<Integer> constructiveHeuristic() {
 
         if (this.contructionMechanism == REACTIVE) {
-            Solution<Integer> solucaoParcial;
-            escolherAlpha();
-            solucaoParcial = super.constructiveHeuristic();
-            atualizarProbAlphas(solucaoParcial);
-            
+            Solution<Integer> partialSolution;
+            selectAlpha();
+            partialSolution = super.constructiveHeuristic();
+            updateAlphasProbabilities(partialSolution);
+
         } else if (this.contructionMechanism == SAMPLED_GREEDY) {
             return sampleGreedyConstruction();
         }
@@ -158,7 +191,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
     /**
      * A GRASP CL generator for MAXQBFPT problem
-     * 
+     *
      * @return A list of candidates to partial solution
      */
     @Override
@@ -177,9 +210,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
     /**
      * The GRASP CL updater for MAXQBFPT problem
-     * 
-     * @return A new list of candidates to partial solution without elements that
-     * turned infeasible because of a prohibited triple
+     *
      */
     @Override
     public void updateCL() {
@@ -216,8 +247,6 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         this.CL = _CL;
     }
 
-
-
     /*
      * Method that implements sampled greedy construction for MAXQBFPT problem
      * First it selects min{sampleGreedyParamenter, |feasibleCandidates|} random candidates
@@ -245,7 +274,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
             /* Chose randomly min{sampleGreedyP,|CL|} candidates to constructi a new CL*/
             @SuppressWarnings("unchecked")
-			ArrayList<Integer> sampledGreedyCL = (ArrayList<Integer>) CL.clone();
+            ArrayList<Integer> sampledGreedyCL = (ArrayList<Integer>) CL.clone();
             Collections.shuffle(sampledGreedyCL);
             int minimumP = Math.min(this.sampleGreedyP, CL.size());
             for (int i = 0; i < minimumP; i++) {
@@ -271,88 +300,86 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         return incumbentSol;
     }
 
-    private void gerarListaAlphas() {
-        double VAL_INICIAL = 0.1;
-        double VAL_INCREMENTO = 0.01;
-        double VAL_FINAL = 1;
+    /**
+     * Generates the list of possible Alphas for Reactive Construction.
+     */
+    private void generateAlphaList() {
+        double INITIAL_VALUE = 0.1;
+        double INCREMENT = 0.01;
+        double FINAL_VALUE = 1;
 
         this.reactiveAlphas = new ArrayList<>();
 
-        for (double val = VAL_INICIAL; val <= VAL_FINAL; val += VAL_INCREMENTO) {
-            AlphaReativo alphaReativo = new AlphaReativo(val, 1D / (VAL_FINAL / VAL_INCREMENTO));
+        for (double val = INITIAL_VALUE; val <= FINAL_VALUE; val += INCREMENT) {
+            ReactiveAlpha alphaReativo = new ReactiveAlpha(val, 1D / (FINAL_VALUE / INCREMENT));
             this.reactiveAlphas.add(alphaReativo);
         }
     }
 
-    private void escolherAlpha() {
-        Random rand = new Random();
-        double probTotal = 0D;
-        double sorteio, soma;
+    /**
+     * Selects an Alpha value from the list of possibilities to be used in the
+     * construction, the selection takes into account the probability of each
+     * Alpha.
+     */
+    private void selectAlpha() {
+        Random random = new Random();
+        double totalProb = 0D;
+        double rand, sum;
 
-        for (AlphaReativo alp : this.reactiveAlphas) {
-            if (alp.getQuantUsos() < 1) {
-                this.alpha = alp.getValor();
+        for (ReactiveAlpha alp : this.reactiveAlphas) {
+            if (alp.getNumberUses() < 1) {
+                this.alpha = alp.getVal();
                 return;
             }
 
-            probTotal += alp.getProb();
+            totalProb += alp.getProb();
         }
 
-        sorteio = rand.nextDouble() * probTotal;
+        rand = random.nextDouble() * totalProb;
 
-        soma = 0D;
-        for (AlphaReativo alp : embaralharLista(this.reactiveAlphas)) {
-            soma += alp.getProb();
+        sum = 0D;
+        Collections.shuffle(this.reactiveAlphas);
+        for (ReactiveAlpha alp : this.reactiveAlphas) {
+            sum += alp.getProb();
 
-            if (soma >= sorteio) {
-                this.alpha = alp.getValor();
+            if (sum >= rand) {
+                this.alpha = alp.getVal();
                 break;
             }
         }
 
-//        System.out.println("Alpha = " + this.alpha);
+        // System.out.println("Selected Alpha = " + this.alpha);
     }
 
-    private void atualizarProbAlphas(Solution<Integer> solucaoParcia) {
-        // Atualizando alpha usado agora
-        for (AlphaReativo alp : this.reactiveAlphas) {
-            if (alp.getValor() == this.alpha) {
-                alp.addUso(solucaoParcia.cost);
+    /**
+     * Updates the probabilities of all Alpha values.
+     *
+     * @param sol Best solution found so far.
+     */
+    private void updateAlphasProbabilities(Solution<Integer> sol) {
+        // Updating used alpha now
+        for (ReactiveAlpha alp : this.reactiveAlphas) {
+            if (alp.getVal() == this.alpha) {
+                alp.addUso(sol.cost);
                 break;
             }
         }
 
-        // Calculando novas probabilidades
-        double somaQi = 0D;
-        double melhorCusto = solucaoParcia.cost;
+        // Calculating new probabilities
+        double qiSum = 0D;
+        double bestCost_ = sol.cost;
+
         if (this.bestCost != null) {
-            melhorCusto = this.bestCost;
-        }
-        for (AlphaReativo alp : this.reactiveAlphas) {
-            somaQi += alp.calcQi(melhorCusto);
+            bestCost_ = this.bestCost;
         }
 
-        for (AlphaReativo alp : this.reactiveAlphas) {
-            alp.setProb(alp.calcQi(melhorCusto) / somaQi);
-        }
-    }
-
-    private ArrayList<AlphaReativo> embaralharLista(ArrayList<AlphaReativo> listaAlphas) {
-        Random rand = new Random();
-        ArrayList<AlphaReativo> resp = new ArrayList<>();
-        ArrayList<Integer> listaIndices = new ArrayList<>();
-
-        for (int i = 0; i < listaAlphas.size(); i++) {
-            listaIndices.add(i);
+        for (ReactiveAlpha alp : this.reactiveAlphas) {
+            qiSum += alp.calcQi(bestCost_);
         }
 
-        while (!listaIndices.isEmpty()) {
-            int n = rand.nextInt(listaIndices.size());
-            resp.add(listaAlphas.get(listaIndices.get(n)));
-            listaIndices.remove(n);
+        for (ReactiveAlpha alp : this.reactiveAlphas) {
+            alp.setProb(alp.calcQi(bestCost_) / qiSum);
         }
-
-        return resp;
     }
 
 }
