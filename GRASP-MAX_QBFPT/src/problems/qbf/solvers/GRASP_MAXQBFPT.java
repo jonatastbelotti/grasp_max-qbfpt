@@ -37,6 +37,11 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     private int sampleGreedyP;
 
     /**
+     * Best solution found by constructive heuristics.
+     */
+    private Solution<Integer> bestSolConstHeurist;
+
+    /**
      * List of element objects used in prohibited triples. These objects
      * represents the variables of the model.
      */
@@ -74,6 +79,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
         super(alpha, firstImproving, timeLimite, iterationsLimit, filename);
         this.contructionMechanism = contructionMechanism;
+        this.bestSolConstHeurist = new Solution<>();
 
         if (contructionMechanism == REACTIVE) {
             generateAlphaList();
@@ -174,19 +180,24 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      */
     @Override
     public Solution<Integer> constructiveHeuristic() {
+        Solution<Integer> partialSolution;
 
         if (this.contructionMechanism == REACTIVE) {
-            Solution<Integer> partialSolution;
             selectAlpha();
             partialSolution = super.constructiveHeuristic();
             updateAlphasProbabilities(partialSolution);
-
         } else if (this.contructionMechanism == SAMPLED_GREEDY) {
-            return sampleGreedyConstruction();
+            partialSolution = sampleGreedyConstruction();
         }
 
         // Standard construction 
-        return super.constructiveHeuristic();
+        partialSolution = super.constructiveHeuristic();
+
+        if (partialSolution.cost < this.bestSolConstHeurist.cost) {
+            this.bestSolConstHeurist = new Solution<>(partialSolution);
+        }
+
+        return partialSolution;
     }
 
     /**
@@ -380,6 +391,10 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         for (ReactiveAlpha alp : this.reactiveAlphas) {
             alp.setProb(alp.calcQi(bestCost_) / qiSum);
         }
+    }
+
+    public Solution<Integer> getBestSolConstHeurist() {
+        return bestSolConstHeurist;
     }
 
 }
