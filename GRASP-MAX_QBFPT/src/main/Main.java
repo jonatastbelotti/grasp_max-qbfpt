@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Savepoint;
-
 import problems.qbf.solvers.GRASP_MAXQBFPT;
 import solutions.Solution;
 
