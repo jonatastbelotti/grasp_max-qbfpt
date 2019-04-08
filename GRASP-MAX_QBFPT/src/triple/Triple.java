@@ -1,4 +1,4 @@
-package problems.qbf;
+package triple;
 
 import java.util.ArrayList;
 import java.util.Arrays;

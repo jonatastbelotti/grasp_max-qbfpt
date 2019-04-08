@@ -6,9 +6,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 import metaheuristics.grasp.AlphaReativo;
-import problems.qbf.Triple;
-import problems.qbf.TripleElement;
 import solutions.Solution;
+import triple.Triple;
+import triple.TripleElement;
 
 /**
  * 

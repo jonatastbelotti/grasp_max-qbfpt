@@ -1,4 +1,4 @@
-package problems.qbf;
+package triple;
 
 /**
  * 
