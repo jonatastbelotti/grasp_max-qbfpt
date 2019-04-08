@@ -78,6 +78,7 @@ public class Main {
             GRASP_MAXQBFPT grasp = new GRASP_MAXQBFPT(ALPHA, CONSTRUCTION_MECHANISM, FIRST_IMPROVING, TIME_LIMIT, ITERATIONS_LIMIT, arquivo);
             Solution<Integer> bestSolution = grasp.solve();
             System.out.println(" maxVal = " + bestSolution);
+            System.out.println(" construction = " + grasp.getBestSolConstHeurist().cost);
 
             long endInstanceTime = System.currentTimeMillis();
             long totalInstanceTime = endInstanceTime - beginInstanceTime;
