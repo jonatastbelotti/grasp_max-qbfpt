@@ -18,26 +18,119 @@ import triple.TripleElement;
  */
 public class GRASP_MAXQBFPT extends GRASP_QBF {
 
-    public static final int CONSTRUCAO_PADRAO = 1;
-    public static final int CONSTRUCAO_REATIVA = 2;
+	// RLC construction mechanisms
+    public static final int STANDARD = 1;
+    public static final int REACTIVE = 2;
     public static final int SAMPLED_GREEDY = 3;
-    private ArrayList<AlphaReativo> listaAlphas;
-
-    private final int tipoConstrucao;
+    private final int contructionMechanism;
+    
+    // List of alphas used in reactive construction
+    private ArrayList<AlphaReativo> reactiveAlphas;
+    
+    // Parameter p used in sampleGreedy construction
+    private int sampleGreedyP;
+    
+    // List of element objects used in prohibited triples
+    // These objects represents the variables of the model
     private TripleElement[] tripleElements;
+    
+    // List of prohibited triples
     private Triple[] triples;
-    private final int sampleGreedyP;
 
-    public GRASP_MAXQBFPT(Double alpha, int tipoConstrucao, Boolean firstImproving, Integer tempoExecucao, Integer iteraConvengencia, String filename) throws IOException {
-        super(alpha, firstImproving, tempoExecucao, iteraConvengencia, filename);
-
-        this.tipoConstrucao = tipoConstrucao;
-        gerarListaAlphas();
-
+    public GRASP_MAXQBFPT(Double alpha, int contructionMechanism, Boolean firstImproving, Integer executionTime, Integer iterationsLimit, String filename) throws IOException {
+        
+    	super(alpha, firstImproving, executionTime, iterationsLimit, filename);
+        this.contructionMechanism = contructionMechanism;
+        
+        if(contructionMechanism == REACTIVE)
+        	gerarListaAlphas();
+        else if(contructionMechanism == SAMPLED_GREEDY)
+        	sampleGreedyP = (int) (0.05 * ObjFunction.getDomainSize());
+        
         generateTripleElements();
         generateTriples();
-        sampleGreedyP = (int) (0.05 * ObjFunction.getDomainSize());
     }
+    
+    /**
+     * Linear congruent function l used to generate pseudo-random numbers
+     */
+    public int l(int pi1, int pi2, int u, int n) {
+        return 1 + ((pi1 * u + pi2) % n);
+    }
+
+    /**
+     * Function g used to generate pseudo-random numbers
+     */
+    public int g(int u, int n) {
+        int pi1 = 131;
+        int pi2 = 1031;
+        int lU = l(pi1, pi2, u, n);
+
+        if (lU != u) {
+            return lU;
+        } else {
+            return 1 + (lU % n);
+        }
+    }
+
+    /**
+     * Function h used to generate pseudo-random numbers
+     */
+    public int h(int u, int n) {
+        int pi1 = 193;
+        int pi2 = 1093;
+        int lU = l(pi1, pi2, u, n);
+        int gU = g(u, n);
+
+        if (lU != u && lU != gU) {
+            return lU;
+        } else if ((1 + (lU % n)) != u && (1 + (lU % n)) != gU) {
+            return 1 + (lU % n);
+        } else {
+            return 1 + ((lU + 1) % n);
+        }
+    }
+    
+    /**
+     * That method generates a list of objects (Triple Elements) that represents each binary
+     * variable that could be inserted into a prohibited triple
+     */
+    private void generateTripleElements() {
+        int n = ObjFunction.getDomainSize();
+        this.tripleElements = new TripleElement[n];
+
+        for (int i = 0; i < n; i++) {
+            tripleElements[i] = new TripleElement(i);
+        }
+    }
+
+    /**
+     * Method that generates a list of n prohibited triples using l g and h functions
+     */
+    private void generateTriples() {
+        int n = ObjFunction.getDomainSize() - 1;
+        this.triples = new Triple[ObjFunction.getDomainSize()];
+
+        for (int u = 0; u <= n; u++) {
+            TripleElement te1, te2, te3;
+            Triple novaTripla;
+
+            te1 = tripleElements[u];
+            te2 = tripleElements[g(u, n)];
+            te3 = tripleElements[h(u, n)];
+            novaTripla = new Triple(te1, te2, te3);
+
+            Collections.sort(novaTripla.getElements(), new Comparator<TripleElement>() {
+                public int compare(TripleElement te1, TripleElement te2) {
+                    return te1.getIndex().compareTo(te2.getIndex());
+                }
+            });
+
+            this.triples[u] = novaTripla;
+        }
+    }
+
+    
 
     /**
      * The GRASP constructive heuristic, which is responsible for building a
@@ -49,13 +142,13 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     @Override
     public Solution<Integer> constructiveHeuristic() {
 
-        if (this.tipoConstrucao == CONSTRUCAO_REATIVA) {
+        if (this.contructionMechanism == REACTIVE) {
             Solution<Integer> solucaoParcial;
-
             escolherAlpha();
             solucaoParcial = super.constructiveHeuristic();
             atualizarProbAlphas(solucaoParcial);
-        } else if (this.tipoConstrucao == SAMPLED_GREEDY) {
+            
+        } else if (this.contructionMechanism == SAMPLED_GREEDY) {
             return sampleGreedyConstruction();
         }
 
@@ -63,6 +156,11 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         return super.constructiveHeuristic();
     }
 
+    /**
+     * A GRASP CL generator for MAXQBFPT problem
+     * 
+     * @return A list of candidates to partial solution
+     */
     @Override
     public ArrayList<Integer> makeCL() {
         int n = ObjFunction.getDomainSize();
@@ -77,6 +175,12 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         return _CL;
     }
 
+    /**
+     * The GRASP CL updater for MAXQBFPT problem
+     * 
+     * @return A new list of candidates to partial solution without elements that
+     * turned infeasible because of a prohibited triple
+     */
     @Override
     public void updateCL() {
         ArrayList<Integer> _CL = new ArrayList<Integer>();
@@ -112,107 +216,13 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         this.CL = _CL;
     }
 
-    /**
-     * That method generates a list of objects that represents each binary
-     * variable called Triple Element that could be inserted into a prohibited
-     * triple
-     *
-     * @return A list of Triple Elements
-     */
-    private void generateTripleElements() {
-        int n = ObjFunction.getDomainSize();
-        this.tripleElements = new TripleElement[n];
 
-        for (int i = 0; i < n; i++) {
-            tripleElements[i] = new TripleElement(i);
-        }
-    }
-
-    /**
-     * Method that generates a list of n prohibited triples using l g and h
-     * functions
-     */
-    private void generateTriples() {
-        int n = ObjFunction.getDomainSize() - 1;
-        this.triples = new Triple[ObjFunction.getDomainSize()];
-
-        for (int u = 0; u <= n; u++) {
-            TripleElement te1, te2, te3;
-            Triple novaTripla;
-
-            te1 = tripleElements[u];
-            te2 = tripleElements[g(u, n)];
-            te3 = tripleElements[h(u, n)];
-            novaTripla = new Triple(te1, te2, te3);
-
-            Collections.sort(novaTripla.getElements(), new Comparator<TripleElement>() {
-                public int compare(TripleElement te1, TripleElement te2) {
-                    return te1.getIndex().compareTo(te2.getIndex());
-                }
-            });
-
-            this.triples[u] = novaTripla;
-        }
-    }
-
-    /**
-     * Linear function congruent used to generate pseudo-random numbers
-     *
-     * @param pi1
-     * @param pi2
-     * @param u
-     * @param n number of variables
-     * @return a pseudo-random variable index
-     */
-    public int l(int pi1, int pi2, int u, int n) {
-        return 1 + ((pi1 * u + pi2) % n);
-    }
-
-    /**
-     * Method that generate the index of a element to be inserted on a
-     * prohibited triple
-     *
-     * @param u
-     * @param n number of variables
-     * @return a pseudo-random variable index
-     */
-    public int g(int u, int n) {
-        int pi1 = 131;
-        int pi2 = 1031;
-        int lU = l(pi1, pi2, u, n);
-
-        if (lU != u) {
-            return lU;
-        } else {
-            return 1 + (lU % n);
-        }
-    }
-
-    /**
-     * Method that generate the index of a element to be inserted on a
-     * prohibited triple
-     *
-     * @param u
-     * @param n number of variables
-     * @return a pseudo-random variable index
-     */
-    public int h(int u, int n) {
-        int pi1 = 193;
-        int pi2 = 1093;
-        int lU = l(pi1, pi2, u, n);
-        int gU = g(u, n);
-
-        if (lU != u && lU != gU) {
-            return lU;
-        } else if ((1 + (lU % n)) != u && (1 + (lU % n)) != gU) {
-            return 1 + (lU % n);
-        } else {
-            return 1 + ((lU + 1) % n);
-        }
-    }
 
     /*
-     * Method that implements SAMPLED GREEDY CONSTRUCTION
+     * Method that implements sampled greedy construction for MAXQBFPT problem
+     * First it selects min{sampleGreedyParamenter, |feasibleCandidates|} random candidates
+     * from all feasible candidates to construct a sampleGreedyCL.
+     * Then 
      */
     private Solution<Integer> sampleGreedyConstruction() {
 
@@ -233,8 +243,9 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
                 break;
             }
 
-            /* Chose randomly min{p,|CL|} candidates to constructi a new CL*/
-            ArrayList<Integer> sampledGreedyCL = (ArrayList<Integer>) CL.clone();
+            /* Chose randomly min{sampleGreedyP,|CL|} candidates to constructi a new CL*/
+            @SuppressWarnings("unchecked")
+			ArrayList<Integer> sampledGreedyCL = (ArrayList<Integer>) CL.clone();
             Collections.shuffle(sampledGreedyCL);
             int minimumP = Math.min(this.sampleGreedyP, CL.size());
             for (int i = 0; i < minimumP; i++) {
@@ -255,7 +266,6 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
             incumbentSol.add(bestCandidate);
             ObjFunction.evaluate(incumbentSol);
             RCL.clear();
-
         }
 
         return incumbentSol;
@@ -266,11 +276,11 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         double VAL_INCREMENTO = 0.01;
         double VAL_FINAL = 1;
 
-        this.listaAlphas = new ArrayList<>();
+        this.reactiveAlphas = new ArrayList<>();
 
         for (double val = VAL_INICIAL; val <= VAL_FINAL; val += VAL_INCREMENTO) {
             AlphaReativo alphaReativo = new AlphaReativo(val, 1D / (VAL_FINAL / VAL_INCREMENTO));
-            this.listaAlphas.add(alphaReativo);
+            this.reactiveAlphas.add(alphaReativo);
         }
     }
 
@@ -279,7 +289,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         double probTotal = 0D;
         double sorteio, soma;
 
-        for (AlphaReativo alp : this.listaAlphas) {
+        for (AlphaReativo alp : this.reactiveAlphas) {
             if (alp.getQuantUsos() < 1) {
                 this.alpha = alp.getValor();
                 return;
@@ -291,7 +301,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         sorteio = rand.nextDouble() * probTotal;
 
         soma = 0D;
-        for (AlphaReativo alp : embaralharLista(this.listaAlphas)) {
+        for (AlphaReativo alp : embaralharLista(this.reactiveAlphas)) {
             soma += alp.getProb();
 
             if (soma >= sorteio) {
@@ -305,7 +315,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
 
     private void atualizarProbAlphas(Solution<Integer> solucaoParcia) {
         // Atualizando alpha usado agora
-        for (AlphaReativo alp : this.listaAlphas) {
+        for (AlphaReativo alp : this.reactiveAlphas) {
             if (alp.getValor() == this.alpha) {
                 alp.addUso(solucaoParcia.cost);
                 break;
@@ -318,11 +328,11 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
         if (this.bestCost != null) {
             melhorCusto = this.bestCost;
         }
-        for (AlphaReativo alp : this.listaAlphas) {
+        for (AlphaReativo alp : this.reactiveAlphas) {
             somaQi += alp.calcQi(melhorCusto);
         }
 
-        for (AlphaReativo alp : this.listaAlphas) {
+        for (AlphaReativo alp : this.reactiveAlphas) {
             alp.setProb(alp.calcQi(melhorCusto) / somaQi);
         }
     }

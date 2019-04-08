@@ -67,10 +67,10 @@ public class Main {
     private static void imprimirTipoConstrucao() {
         String resp = " Tipo construção = ";
         
-        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.CONSTRUCAO_PADRAO) {
+        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.STANDARD) {
             resp += "Construção padrão";
         }
-        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.CONSTRUCAO_REATIVA) {
+        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.REACTIVE) {
             resp += "Construção reativa";
         }
         if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.SAMPLED_GREEDY) {
@@ -82,7 +82,7 @@ public class Main {
     }
 
     private static void imprimirAlpha() {
-        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.CONSTRUCAO_PADRAO) {
+        if (TIPO_CONSTRUCAO == GRASP_MAXQBFPT.STANDARD) {
             System.out.println(" Alpha = " + ALPHA);
         }
     }
