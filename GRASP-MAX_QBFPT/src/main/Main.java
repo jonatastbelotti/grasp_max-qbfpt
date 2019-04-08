@@ -24,7 +24,7 @@ public class Main {
     public static int CONSTRUCTION_MECHANISM;
     public static boolean FIRST_IMPROVING;
     public static int TIME_LIMIT = 30; // In minutes
-    public static int ITERATIONS_LIMIT = 1000; // Iterations without improvement in incumbent (negative values for not using iterations limit)
+    public static int ITERATIONS_LIMIT = 100; // Iterations without improvement in incumbent (negative values for not using iterations limit)
     public static String outputCsv;
     
     public static final String[] FILES_LIST = new String[]{
@@ -48,7 +48,7 @@ public class Main {
     	executeGRASP(0.05, GRASP_MAXQBFPT.REACTIVE, true); // Standard with reactive construction mechanism
     	executeGRASP(0.05, GRASP_MAXQBFPT.SAMPLED_GREEDY, true); // Standard with sampled greedy construction mechanism
     	
-    	saveOutput("outputCsv.csv", outputCsv);
+    	saveOutput("output.csv", outputCsv);
     }
     
     private static void executeGRASP(double alpha, int constructionMechanism, boolean firstImproving) throws IOException {
