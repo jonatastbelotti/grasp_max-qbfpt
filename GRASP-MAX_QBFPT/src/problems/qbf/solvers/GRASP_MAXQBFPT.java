@@ -60,7 +60,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      * convergence and the file with the coefficients of that instance of the
      * problem.
      *
-     * @param alpha O valor de Alpha que deverá ser utilizado na construção.
+     * @param alpha The value of the alpha used in construction
      * @param contructionMechanism The type of construction to be used
      * (GRASP_MAXQBFPT.STANDARD, GRASP_MAXQBFPT.REACTIVE e
      * GRASP_MAXQBFPT.SAMPLED_GREEDY).

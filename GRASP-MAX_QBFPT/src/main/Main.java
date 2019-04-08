@@ -30,17 +30,17 @@ public class Main {
     public static final String[] FILES_LIST = new String[]{
         "instances/qbf020",
         "instances/qbf040",
-       // "instances/qbf060",
-        //"instances/qbf080",
-        //"instances/qbf100",
-       // "instances/qbf200",
-       // "instances/qbf400"
+        "instances/qbf060",
+        "instances/qbf080",
+        "instances/qbf100",
+        "instances/qbf200",
+        "instances/qbf400"
     };
 
     //Calls execution method with 5 different configurations
     public static void main(String[] args) throws IOException {
     	
-    	outputCsv = "fileName,alpha,construction,localSearch\n";
+    	outputCsv = "fileName,alpha,construction,localSearch,valueConstruction,valueGRASP\n";
     	
     	executeGRASP(0.05, GRASP_MAXQBFPT.STANDARD, true); //Standard configuration
     	executeGRASP(0.10, GRASP_MAXQBFPT.STANDARD, true); //Standard with other alpha value
@@ -48,7 +48,7 @@ public class Main {
     	executeGRASP(0.05, GRASP_MAXQBFPT.REACTIVE, true); // Standard with reactive construction mechanism
     	executeGRASP(0.05, GRASP_MAXQBFPT.SAMPLED_GREEDY, true); // Standard with sampled greedy construction mechanism
     	
-    	saveOutput(outputCsv);
+    	saveOutput("outputCsv.csv", outputCsv);
     }
     
     private static void executeGRASP(double alpha, int constructionMechanism, boolean firstImproving) throws IOException {
@@ -84,7 +84,8 @@ public class Main {
             System.out.println("Time = " + (double) totalInstanceTime / (double) 1000 + " seg");
             System.out.println("\n");
             
-            outputCsv += arquivo + "," + ALPHA + "," + CONSTRUCTION_MECHANISM + "," + FIRST_IMPROVING + "\n";
+            outputCsv += arquivo + "," + ALPHA + "," + CONSTRUCTION_MECHANISM + "," + FIRST_IMPROVING + "," +
+            		+ grasp.getBestSolConstHeurist().cost + "," + bestSolution.cost + "\n";
             
         }
 
@@ -142,7 +143,7 @@ public class Main {
         System.out.println(resp);
     }
     
-    public static void saveOutput(String content) {
+    public static void saveOutput(String fileName, String content) {
         File dir;
         PrintWriter out;
 
@@ -153,7 +154,7 @@ public class Main {
         }
 
         try {
-        	out = new PrintWriter(new File(dir, "output.csv"));
+        	out = new PrintWriter(new File(dir, fileName));
         	out.print(content);
         	out.close();
         } catch (FileNotFoundException ex) {
