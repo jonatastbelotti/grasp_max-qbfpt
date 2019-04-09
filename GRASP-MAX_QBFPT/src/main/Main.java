@@ -9,12 +9,10 @@ import solutions.Solution;
 
 /**
  * Class that executes the GRASP for MAXQBFPT problem
- * 
- * Standard configuration:
- * Alpha = 0.05
- * Construction mechanism = standard
- * Local search = first improvement
- * 
+ *
+ * Standard configuration: Alpha = 0.05 Construction mechanism = standard Local
+ * search = first improvement
+ *
  * @author Jônatas Trabuco Belotti [jonatas.t.belotti@hotmail.com]
  * @author Felipe de Carvalho Pereira [felipe.pereira@students.ic.unicamp.br]
  */
@@ -26,7 +24,7 @@ public class Main {
     public static int TIME_LIMIT = 30; // In minutes
     public static int ITERATIONS_LIMIT = 1000; // Iterations without improvement in incumbent (negative values for not using iterations limit)
     public static String outputCsv;
-    
+
     public static final String[] FILES_LIST = new String[]{
         "instances/qbf020",
         "instances/qbf040",
@@ -39,30 +37,29 @@ public class Main {
 
     //Calls execution method with 5 different configurations
     public static void main(String[] args) throws IOException {
-    	
-    	outputCsv = "fileName,alpha,construction,localSearch,valueConstruction,valueGRASP\n";
-    	
-    	executeGRASP(0.05, GRASP_MAXQBFPT.STANDARD, true); //Standard configuration
-    	executeGRASP(0.10, GRASP_MAXQBFPT.STANDARD, true); //Standard with other alpha value
-    	executeGRASP(0.05, GRASP_MAXQBFPT.STANDARD, false); //Standard with best improving
-    	executeGRASP(0.05, GRASP_MAXQBFPT.REACTIVE, true); // Standard with reactive construction mechanism
-    	executeGRASP(0.05, GRASP_MAXQBFPT.SAMPLED_GREEDY, true); // Standard with sampled greedy construction mechanism
-    	
-    	saveOutput("output.csv", outputCsv);
+
+        outputCsv = "fileName,alpha,construction,localSearch,valueConstruction,valueGRASP\n";
+
+        executeGRASP(0.05, GRASP_MAXQBFPT.STANDARD, true); //Standard configuration
+        executeGRASP(0.10, GRASP_MAXQBFPT.STANDARD, true); //Standard with other alpha value
+        executeGRASP(0.05, GRASP_MAXQBFPT.STANDARD, false); //Standard with best improving
+        executeGRASP(0.05, GRASP_MAXQBFPT.REACTIVE, true); // Standard with reactive construction mechanism
+        executeGRASP(0.05, GRASP_MAXQBFPT.SAMPLED_GREEDY, true); // Standard with sampled greedy construction mechanism
+
+        saveOutput("output.csv", outputCsv);
     }
-    
+
     private static void executeGRASP(double alpha, int constructionMechanism, boolean firstImproving) throws IOException {
-    	
-    	
-    	long beginTotalTime = System.currentTimeMillis();
-    	ALPHA = alpha;
-    	CONSTRUCTION_MECHANISM = constructionMechanism;
-    	FIRST_IMPROVING = firstImproving;
-    	
+
+        long beginTotalTime = System.currentTimeMillis();
+        ALPHA = alpha;
+        CONSTRUCTION_MECHANISM = constructionMechanism;
+        FIRST_IMPROVING = firstImproving;
+
         // Iterating over files
         for (String arquivo : FILES_LIST) {
-        	
-        	//Print configurations of the execution
+
+            //Print configurations of the execution
             System.out.println("Executing GRASP for file: " + arquivo);
             System.out.println("Configuration:");
             printConstructionMechanism();
@@ -84,22 +81,22 @@ public class Main {
             long totalInstanceTime = endInstanceTime - beginInstanceTime;
             System.out.println("Time = " + (double) totalInstanceTime / (double) 1000 + " seg");
             System.out.println("\n");
-            
-            outputCsv += arquivo + "," + ALPHA + "," + CONSTRUCTION_MECHANISM + "," + FIRST_IMPROVING + "," +
-            		+ grasp.getBestSolConstHeurist().cost + "," + bestSolution.cost + "\n";
-            
+
+            outputCsv += arquivo + "," + ALPHA + "," + CONSTRUCTION_MECHANISM + "," + FIRST_IMPROVING + ","
+                    + +grasp.getBestSolConstHeurist().cost + "," + bestSolution.cost + "\n";
+
         }
 
         // Calculating time of all executions
         long totalTime = System.currentTimeMillis() - beginTotalTime;
 
-        System.out.println("Tempo execução todos arquivos: " + (totalTime / 1000D) + "seg \n" +
-        		"----------------------------------------------------- \n \n");
+        System.out.println("Tempo execução todos arquivos: " + (totalTime / 1000D) + "seg \n"
+                + "----------------------------------------------------- \n \n");
     }
 
     private static void printConstructionMechanism() {
         String resp = " Construction mechanism = ";
-        
+
         if (CONSTRUCTION_MECHANISM == GRASP_MAXQBFPT.STANDARD) {
             resp += "Standard";
         }
@@ -109,8 +106,7 @@ public class Main {
         if (CONSTRUCTION_MECHANISM == GRASP_MAXQBFPT.SAMPLED_GREEDY) {
             resp += "Sampled greedy";
         }
-        
-        
+
         System.out.println(resp);
     }
 
@@ -122,28 +118,28 @@ public class Main {
 
     private static void printLocalSearchStrategie() {
         String resp = " Local Search = ";
-        
+
         if (FIRST_IMPROVING) {
             resp += "First Improving";
         } else {
             resp += "Best Improving";
         }
-        
+
         System.out.println(resp);
     }
 
     private static void printStopCriterion() {
         String resp = " Stop Criterion = ";
-        
+
         resp += TIME_LIMIT + " minutes";
-        
+
         if (ITERATIONS_LIMIT > 0) {
             resp += " ou " + ITERATIONS_LIMIT + " iterations without new incumbent";
         }
-        
+
         System.out.println(resp);
     }
-    
+
     public static void saveOutput(String fileName, String content) {
         File dir;
         PrintWriter out;
@@ -151,15 +147,15 @@ public class Main {
         dir = new File("output");
 
         if (!dir.exists()) {
-        	dir.mkdirs();
+            dir.mkdirs();
         }
 
         try {
-        	out = new PrintWriter(new File(dir, fileName));
-        	out.print(content);
-        	out.close();
+            out = new PrintWriter(new File(dir, fileName));
+            out.print(content);
+            out.close();
         } catch (FileNotFoundException ex) {
-        	ex.printStackTrace();
+            ex.printStackTrace();
         }
     }
 }
