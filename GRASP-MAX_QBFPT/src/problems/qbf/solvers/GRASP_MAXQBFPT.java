@@ -297,7 +297,7 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
             }
 
             /* Choose the best candidate from the RCL */
-            for (Integer c : sampledGreedyCL) {
+            for (Integer c : RCL) {
                 Double newCost = ObjFunction.evaluateInsertionCost(c, incumbentSol);
                 if (newCost < minCost) {
                     minCost = newCost;
