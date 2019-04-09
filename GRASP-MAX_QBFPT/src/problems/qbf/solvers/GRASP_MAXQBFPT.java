@@ -315,9 +315,9 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      * Generates the list of possible Alphas for Reactive Construction.
      */
     private void generateAlphaList() {
-        double INITIAL_VALUE = 0.1;
+        double INITIAL_VALUE = 0.01;
         double INCREMENT = 0.01;
-        double FINAL_VALUE = 1;
+        double FINAL_VALUE = 1D;
 
         this.reactiveAlphas = new ArrayList<>();
 
