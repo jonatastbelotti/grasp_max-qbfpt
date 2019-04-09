@@ -182,16 +182,20 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     public Solution<Integer> constructiveHeuristic() {
         Solution<Integer> partialSolution;
 
-        if (this.contructionMechanism == REACTIVE) {
-            selectAlpha();
-            partialSolution = super.constructiveHeuristic();
-            updateAlphasProbabilities(partialSolution);
-        } else if (this.contructionMechanism == SAMPLED_GREEDY) {
-            partialSolution = sampleGreedyConstruction();
+        switch (this.contructionMechanism) {
+            case REACTIVE:
+                selectAlpha();
+                partialSolution = super.constructiveHeuristic();
+                updateAlphasProbabilities(partialSolution);
+                break;
+            case SAMPLED_GREEDY:
+                partialSolution = sampleGreedyConstruction();
+                break;
+            default:
+                // Standard constructive
+                partialSolution = super.constructiveHeuristic();
+                break;
         }
-
-        // Standard construction 
-        partialSolution = super.constructiveHeuristic();
 
         if (partialSolution.cost < this.bestSolConstHeurist.cost) {
             this.bestSolConstHeurist = new Solution<>(partialSolution);
