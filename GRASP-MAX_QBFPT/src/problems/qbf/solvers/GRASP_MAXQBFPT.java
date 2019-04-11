@@ -149,25 +149,25 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      * functions
      */
     private void generateTriples() {
-        int n = ObjFunction.getDomainSize() - 1;
+        int n = ObjFunction.getDomainSize();
         this.triples = new Triple[ObjFunction.getDomainSize()];
 
-        for (int u = 0; u <= n; u++) {
+        for (int u = 1; u <= n; u++) {
             TripleElement te1, te2, te3;
             Triple novaTripla;
 
-            te1 = tripleElements[u];
-            te2 = tripleElements[g(u, n)];
-            te3 = tripleElements[h(u, n)];
+            te1 = tripleElements[u - 1];
+            te2 = tripleElements[g(u - 1, n) - 1];
+            te3 = tripleElements[h(u - 1, n) - 1];
             novaTripla = new Triple(te1, te2, te3);
-
+            
             Collections.sort(novaTripla.getElements(), new Comparator<TripleElement>() {
                 public int compare(TripleElement te1, TripleElement te2) {
                     return te1.getIndex().compareTo(te2.getIndex());
                 }
             });
-
-            this.triples[u] = novaTripla;
+            //novaTripla.printTriple();
+            this.triples[u-1] = novaTripla;
         }
     }
 
