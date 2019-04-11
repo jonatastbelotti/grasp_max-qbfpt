@@ -22,13 +22,13 @@ public class Main {
     public static int CONSTRUCTION_MECHANISM;
     public static boolean FIRST_IMPROVING;
     public static int TIME_LIMIT = 30; // In minutes
-    public static int ITERATIONS_LIMIT = 1000; // Iterations without improvement in incumbent (negative values for not using iterations limit)
+    public static int ITERATIONS_LIMIT = -1; // Iterations without improvement in incumbent (negative values for not using iterations limit)
     public static String outputCsv;
 
     public static final String[] FILES_LIST = new String[]{
         "instances/qbf020",
-        "instances/qbf040",
-        "instances/qbf060",
+    	"instances/qbf040",
+    	"instances/qbf060",
         "instances/qbf080",
         "instances/qbf100",
         "instances/qbf200",
